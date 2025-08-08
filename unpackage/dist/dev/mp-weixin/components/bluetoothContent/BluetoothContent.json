@@ -1,0 +1,9 @@
+{
+  "component": true,
+  "usingComponents": {
+    "uni-icons": "/uni_modules/uni-icons/components/uni-icons/uni-icons",
+    "bluetooth-signal": "/components/bluetoothSignal/BluetoothSignal",
+    "modal": "/components/modal/Modal",
+    "blue-modal": "/components/modal/BlueModal"
+  }
+}

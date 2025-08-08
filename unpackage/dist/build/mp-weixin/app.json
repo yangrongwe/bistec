@@ -1,0 +1,23 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/confort/Confort",
+    "pages/normal/Normal"
+  ],
+  "subPackages": [
+    {
+      "root": "page_setting",
+      "pages": [
+        "setting/Setting"
+      ]
+    }
+  ],
+  "window": {
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "BIS",
+    "navigationBarBackgroundColor": "#001232",
+    "backgroundColor": "#F8F8F8"
+  },
+  "permission": {},
+  "usingComponents": {}
+}

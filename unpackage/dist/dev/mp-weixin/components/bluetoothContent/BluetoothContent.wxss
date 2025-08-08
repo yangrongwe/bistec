@@ -1,0 +1,100 @@
+.bis-flex.data-v-d6f26ef8 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20rpx;
+}
+.bluetooth-content-box.data-v-d6f26ef8 {
+  box-sizing: border-box;
+  position: relative;
+  padding-bottom: 220rpx;
+  width: 100%;
+  height: 100%;
+}
+.bluetooth-content-box .header.data-v-d6f26ef8 {
+  width: 100%;
+  color: white;
+  text-align: center;
+  font-size: 32rpx;
+}
+.bluetooth-content-box .main.data-v-d6f26ef8 {
+  box-sizing: border-box;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.bluetooth-content-box .main .car-icon-img.data-v-d6f26ef8 {
+  box-sizing: border-box;
+  display: block;
+  margin-top: 10rpx;
+  margin: 0 auto;
+  width: 140rpx;
+  height: 140rpx;
+}
+.bluetooth-content-box .main .bluetooth-signal-img.data-v-d6f26ef8 {
+  display: block;
+  position: absolute;
+  right: 40rpx;
+  top: 50rpx;
+  width: 60rpx;
+  height: 38rpx;
+}
+.bluetooth-content-box .main .car-box.data-v-d6f26ef8 {
+  position: relative;
+  top: 50%;
+  -webkit-transform: translateY(-70%);
+          transform: translateY(-70%);
+  width: 100%;
+  height: 774rpx;
+}
+.bluetooth-content-box .main .car-box .car-img.data-v-d6f26ef8 {
+  margin: 0 auto;
+  display: block;
+  width: 342rpx;
+  height: 100%;
+}
+.bluetooth-content-box .main .car-box .disable-img.data-v-d6f26ef8 {
+  display: block;
+  position: absolute;
+  top: 12%;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+          transform: translateX(-50%);
+  width: 412rpx;
+  height: 412rpx;
+}
+.bluetooth-content-box .main .car-box .center-point.data-v-d6f26ef8 {
+  position: absolute;
+  top: 290rpx;
+  left: 366rpx;
+  width: 0;
+  height: 0;
+  border: 10rpx solid red;
+  border-radius: 10rpx;
+  transition: all 0.3s;
+}
+.bluetooth-content-box .main .signal-top.data-v-d6f26ef8 {
+  position: absolute;
+  top: 140rpx;
+  z-index: 1;
+}
+.bluetooth-content-box .main .signal-bottom.data-v-d6f26ef8 {
+  position: absolute;
+  bottom: 200rpx;
+  z-index: 1;
+}
+.bluetooth-content-box .main .left.data-v-d6f26ef8 {
+  left: 40rpx;
+  z-index: 1;
+}
+.bluetooth-content-box .main .right.data-v-d6f26ef8 {
+  right: 40rpx;
+  z-index: 1;
+}
+.bluetooth-content-box .main .phone-icon.data-v-d6f26ef8 {
+  position: absolute;
+  top: 45%;
+  right: 40rpx;
+  z-index: 10;
+}
+

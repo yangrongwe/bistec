@@ -1,0 +1,30 @@
+
+// #ifndef VUE3
+import Vue from 'vue'
+import App from './App'
+import store from "./store/index.js"
+import shareMixin from './util/share.js'
+Vue.config.productionTip = false
+
+App.mpType = 'app'
+
+const app = new Vue({
+    ...App,
+	store,
+  mixins: [shareMixin]
+})
+app.$mount()
+// #endif
+
+// #ifdef VUE3
+import { createSSRApp } from 'vue'
+import App from './App.vue'
+import shareMixin from './util/share.js' 
+export function createApp() {
+  const app = createSSRApp(App)
+   app.mixin(shareMixin)
+  return {
+    app
+  }
+}
+// #endif
