@@ -105,11 +105,11 @@
 /******/
 /******/
 /******/ 		// mini-css-extract-plugin CSS loading
-/******/ 		var cssChunks = {"components/bluetoothContent/BluetoothContent":1,"components/tabbar/Tabbar":1,"uni_modules/uni-icons/components/uni-icons/uni-icons":1,"components/bluetoothSignal/BluetoothSignal":1,"components/modal/BlueModal":1,"components/modal/Modal":1};
+/******/ 		var cssChunks = {"components/bluetoothContent/BluetoothContent":1,"components/tabbar/Tabbar":1,"uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput":1,"uni_modules/uni-icons/components/uni-icons/uni-icons":1,"components/bluetoothSignal/BluetoothSignal":1,"components/modal/BlueModal":1,"components/modal/Modal":1};
 /******/ 		if(installedCssChunks[chunkId]) promises.push(installedCssChunks[chunkId]);
 /******/ 		else if(installedCssChunks[chunkId] !== 0 && cssChunks[chunkId]) {
 /******/ 			promises.push(installedCssChunks[chunkId] = new Promise(function(resolve, reject) {
-/******/ 				var href = "" + ({"components/bluetoothContent/BluetoothContent":"components/bluetoothContent/BluetoothContent","components/tabbar/Tabbar":"components/tabbar/Tabbar","uni_modules/uni-icons/components/uni-icons/uni-icons":"uni_modules/uni-icons/components/uni-icons/uni-icons","components/bluetoothSignal/BluetoothSignal":"components/bluetoothSignal/BluetoothSignal","components/modal/BlueModal":"components/modal/BlueModal","components/modal/Modal":"components/modal/Modal"}[chunkId]||chunkId) + ".wxss";
+/******/ 				var href = "" + ({"components/bluetoothContent/BluetoothContent":"components/bluetoothContent/BluetoothContent","components/tabbar/Tabbar":"components/tabbar/Tabbar","uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput":"uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput","uni_modules/uni-icons/components/uni-icons/uni-icons":"uni_modules/uni-icons/components/uni-icons/uni-icons","components/bluetoothSignal/BluetoothSignal":"components/bluetoothSignal/BluetoothSignal","components/modal/BlueModal":"components/modal/BlueModal","components/modal/Modal":"components/modal/Modal"}[chunkId]||chunkId) + ".wxss";
 /******/ 				var fullhref = __webpack_require__.p + href;
 /******/ 				var existingLinkTags = document.getElementsByTagName("link");
 /******/ 				for(var i = 0; i < existingLinkTags.length; i++) {
