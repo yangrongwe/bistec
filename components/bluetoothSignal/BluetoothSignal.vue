@@ -22,14 +22,14 @@
 		name:"BluetoothSignal",
 		data() {
 			return {
-				signalBack:"http://bistec.cn/photo/pics/smallApp/bluetoothSignal/leftSignalBack.png",
-				signalBackRight:"http://bistec.cn/photo/pics/smallApp/bluetoothSignal/rightSignalBack.png",
-				progressBack:"http://bistec.cn/photo/pics/smallApp/bluetoothSignal/progressLeft.png",
-				progressBackRight:"http://bistec.cn/photo/pics/smallApp/bluetoothSignal/progressRight.png",
-				progressFirst:"http://bistec.cn/photo/pics/smallApp/bluetoothSignal/left_first_red_",
-				progressFirstRight:"http://bistec.cn/photo/pics/smallApp/bluetoothSignal/right_first_yellow_",
-				progressSecond:"http://bistec.cn/photo/pics/smallApp/bluetoothSignal/left_second_yellow_",
-				progressSecondRight:"http://bistec.cn/photo/pics/smallApp/bluetoothSignal/right_second_red_",
+				signalBack:"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/bluetoothSignal/leftSignalBack.png",
+				signalBackRight:"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/bluetoothSignal/rightSignalBack.png",
+				progressBack:"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/bluetoothSignal/progressLeft.png",
+				progressBackRight:"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/bluetoothSignal/progressRight.png",
+				progressFirst:"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/bluetoothSignal/left_first_red_",
+				progressFirstRight:"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/bluetoothSignal/right_first_yellow_",
+				progressSecond:"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/bluetoothSignal/left_second_yellow_",
+				progressSecondRight:"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/bluetoothSignal/right_second_red_",
 			};
 		},
 		props:["right","first","second"]

@@ -39,6 +39,5 @@
   text-align: center;
 }
 .tabbar .tabbar-item .tabbarActive.data-v-316606a4 {
-  color: #0562FF !important;
+  color: #0562ff !important;
 }
-

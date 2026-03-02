@@ -18,7 +18,7 @@
     }
   },
   "compileType": "miniprogram",
-  "libVersion": "2.30.4",
+  "libVersion": "3.11.1",
   "appid": "wxb90a7178ae2b176e",
   "projectname": "BIS",
   "condition": {},

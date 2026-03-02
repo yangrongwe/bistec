@@ -2,7 +2,7 @@
 	<view class="container">
 		<image v-for="(item,index) in urls" :key="index" :src="item" mode="" style="width: 0px;height: 0px;opacity: 0;"></image>
 
-		<image class="all-back" src="http://bistec.cn/photo/pics/smallApp/backImage/settingBack.png" mode=""></image>
+		<image class="all-back" src="https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/backImage/settingBack.png" mode=""></image>
 		
 		<view class="header" :style="{height:totalHeight+'px'}">
 			<uni-icons :style="{top:menuTop-10+'px'}" class="back-icon" type="back" size="26" color="white" @click="backToIndex"></uni-icons>
@@ -28,7 +28,7 @@
 		<!-- 悬架、侧倾设置 -->
 		<view class="car-box">
 			<!-- 背景 -->
-			<!-- <image class="car-back" src="http://bistec.cn/photo/pics/smallApp/backImage/carBack.png" mode=""></image> -->
+			<!-- <image class="car-back" src="https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/backImage/carBack.png" mode=""></image> -->
 			<!-- 悬架、侧倾 -->
 			<view v-for="(item,index) in gaugeList" :key="index" class="suspension" :class="{'behind-suspension':item.mainRotate}">
 				<!-- 左按钮 -->
@@ -52,14 +52,14 @@
 			<!-- 重置 -->
 			<view class="action-btn-box action-reset" @click="reset">
 				<view class="action-btn">
-					<image class="icon-img" src="http://bistec.cn/photo/pics/smallApp/iconImage/Reset.png" mode=""></image>
+					<image class="icon-img" src="https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/iconImage/Reset.png" mode=""></image>
 					<view class="action-content">点击重置</view>
 				</view>
 			</view>
 			<!-- 应用 -->
 			<view class="action-btn-box action-apply" @click="apply">
 				<view class="action-btn">
-					<image class="icon-img" src="http://bistec.cn/photo/pics/smallApp/iconImage/click.png" mode=""></image>
+					<image class="icon-img" src="https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/iconImage/click.png" mode=""></image>
 					<view class="action-content">点击应用</view>
 				</view>
 			</view>
@@ -67,20 +67,21 @@
 
 		<!-- 拉伸压缩 -->
 		<view class="draw-compress-box">
-			<view class="draw-compress-text">拉伸/压缩</view>
+			<view class="draw-compress-text">后悬架复原</view>
 			<view class="draw-compress-content">
 				<view class="draw-compress-btn" @click="drawAction('reduce')">
-					Com
+					<image  style="height: 48rpx;width:48rpx;" src="https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/iconImage/reduce.png" mode="" ></image>
 				</view>
-				<!-- <image class="btn-image" src="http://bistec.cn/photo/pics/smallApp/iconImage/reduce.png" mode="" @click="drawAction('reduce')"></image> -->
+				<!-- <image class="btn-image" src="https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/iconImage/reduce.png" mode="" @click="drawAction('reduce')"></image> -->
 				<view class="progress-box">
-					<image class="empty-progress" src="http://bistec.cn/photo/pics/smallApp/drawCompress/progressEmpty.png" mode=""></image>
-					<image class="progress" :src="'http://bistec.cn/photo/pics/smallApp/drawCompress/progress_'+drawProgress+'.png'" mode=""></image>
+					<image class="empty-progress" src="https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/drawCompress/progressEmpty.png" mode=""></image>
+					<image class="progress" :src="'https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/drawCompress/progress_'+drawProgress+'.png'" mode=""></image>
 				</view>
 				<view class="draw-compress-btn" @click="drawAction('add')">
-					Reb
+					<image style="height: 48rpx;width:48rpx;" src="https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/iconImage/add.png" mode=""></image>
 				</view>
-				<!-- <image class="btn-image" src="http://bistec.cn/photo/pics/smallApp/iconImage/add.png" mode="" @click="drawAction('add')"></image> -->
+				
+				<!-- <image class="btn-image" src="https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/iconImage/add.png" mode="" @click="drawAction('add')"></image> -->
 			</view>
 		</view>
 	</view>
@@ -96,54 +97,54 @@ import {sendData} from "../../util/sendInfo.js"
 				sceneList:[
 					{
 						name:"公路",
-						path:"http://bistec.cn/photo/pics/smallApp/iconImage/highway.png",
-						activePath:"http://bistec.cn/photo/pics/smallApp/iconImage/highway_active.png",
+						path:"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/iconImage/highway.png",
+						activePath:"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/iconImage/highway_active.png",
 						status:false
 					},
 					{
 						name:"湿地",
-						path:"http://bistec.cn/photo/pics/smallApp/iconImage/wetland.png",
-						activePath:"http://bistec.cn/photo/pics/smallApp/iconImage/wetland_active.png",
+						path:"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/iconImage/wetland.png",
+						activePath:"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/iconImage/wetland_active.png",
 						status:false
 					},
 					{
 						name:"沙漠",
-						path:"http://bistec.cn/photo/pics/smallApp/iconImage/desert.png",
-						activePath:"http://bistec.cn/photo/pics/smallApp/iconImage/desert_active.png",
+						path:"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/iconImage/desert.png",
+						activePath:"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/iconImage/desert_active.png",
 						status:false
 					}
 				],
 				gaugeList:[
 					{
-						name:"前悬架",
+						name:"前悬架压缩",
 						mainRotate:false,
-						btnImgSrc:"http://bistec.cn/photo/pics/smallApp/suspension/blueBtnRight.png",
-						btnLeftImgSrc:"http://bistec.cn/photo/pics/smallApp/suspension/blueBtnLeft.png",
+						btnImgSrc:"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/suspension/blueBtnRight.png",
+						btnLeftImgSrc:"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/suspension/blueBtnLeft.png",
 						gaugeImgRotate:false,
-						gaugeImgSrc:"http://bistec.cn/photo/pics/smallApp/suspension/suspension.png",
-						progressImgSrc:"http://bistec.cn/photo/pics/smallApp/suspension/progress_behind_",
+						gaugeImgSrc:"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/suspension/suspension.png",
+						progressImgSrc:"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/suspension/progress_behind_",
 						progressType:"front",
 						progress:5
 					},
 					{
-						name:"侧倾",
+						name:"前悬架复原",
 						mainRotate:false,
-						btnImgSrc:"http://bistec.cn/photo/pics/smallApp/iconImage/add.png",
-						btnLeftImgSrc:"http://bistec.cn/photo/pics/smallApp/iconImage/reduce.png",
+						btnImgSrc:"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/iconImage/add.png",
+						btnLeftImgSrc:"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/iconImage/reduce.png",
 						gaugeImgRotate:false,
-						gaugeImgSrc:"http://bistec.cn/photo/pics/smallApp/heel/heel.png",
-						progressImgSrc:"http://bistec.cn/photo/pics/smallApp/heel/progress_",
+						gaugeImgSrc:"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/heel/heel.png",
+						progressImgSrc:"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/heel/progress_",
 						progressType:"heel",
 						progress:5
 					},
 					{
-						name:"后悬架",
+						name:"后悬架压缩",
 						mainRotate:true,
-						btnImgSrc:"http://bistec.cn/photo/pics/smallApp/suspension/blueBtnRight.png",
-						btnLeftImgSrc:"http://bistec.cn/photo/pics/smallApp/suspension/blueBtnLeft.png",
+						btnImgSrc:"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/suspension/blueBtnRight.png",
+						btnLeftImgSrc:"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/suspension/blueBtnLeft.png",
 						gaugeImgRotate:true,
-						gaugeImgSrc:"http://bistec.cn/photo/pics/smallApp/suspension/suspension.png",
-						progressImgSrc:"http://bistec.cn/photo/pics/smallApp/suspension/progress_",
+						gaugeImgSrc:"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/suspension/suspension.png",
+						progressImgSrc:"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/suspension/progress_",
 						progressType:"behind",
 						progress:5
 					}
@@ -161,45 +162,45 @@ import {sendData} from "../../util/sendInfo.js"
 				uuidServices:"",
 				characteristicId:"",
 				urls:[ //预加载图片地址
-					"http://bistec.cn/photo/pics/smallApp/iconImage/highway_active.png",
-					"http://bistec.cn/photo/pics/smallApp/iconImage/wetland_active.png",
-					"http://bistec.cn/photo/pics/smallApp/iconImage/desert_active.png",
-					"http://bistec.cn/photo/pics/smallApp/suspension/progress_behind_1.png",
-					"http://bistec.cn/photo/pics/smallApp/suspension/progress_behind_2.png",
-					"http://bistec.cn/photo/pics/smallApp/suspension/progress_behind_3.png",
-					"http://bistec.cn/photo/pics/smallApp/suspension/progress_behind_4.png",
-					"http://bistec.cn/photo/pics/smallApp/suspension/progress_behind_5.png",
-					"http://bistec.cn/photo/pics/smallApp/suspension/progress_behind_6.png",
-					"http://bistec.cn/photo/pics/smallApp/suspension/progress_behind_7.png",
-					"http://bistec.cn/photo/pics/smallApp/suspension/progress_behind_8.png",
-					"http://bistec.cn/photo/pics/smallApp/suspension/progress_behind_9.png",
-					"http://bistec.cn/photo/pics/smallApp/heel/progress_1.png",
-					"http://bistec.cn/photo/pics/smallApp/heel/progress_2.png",
-					"http://bistec.cn/photo/pics/smallApp/heel/progress_3.png",
-					"http://bistec.cn/photo/pics/smallApp/heel/progress_4.png",
-					"http://bistec.cn/photo/pics/smallApp/heel/progress_5.png",
-					"http://bistec.cn/photo/pics/smallApp/heel/progress_6.png",
-					"http://bistec.cn/photo/pics/smallApp/heel/progress_7.png",
-					"http://bistec.cn/photo/pics/smallApp/heel/progress_8.png",
-					"http://bistec.cn/photo/pics/smallApp/heel/progress_9.png",
-					"http://bistec.cn/photo/pics/smallApp/suspension/progress_1.png",
-					"http://bistec.cn/photo/pics/smallApp/suspension/progress_2.png",
-					"http://bistec.cn/photo/pics/smallApp/suspension/progress_3.png",
-					"http://bistec.cn/photo/pics/smallApp/suspension/progress_4.png",
-					"http://bistec.cn/photo/pics/smallApp/suspension/progress_5.png",
-					"http://bistec.cn/photo/pics/smallApp/suspension/progress_6.png",
-					"http://bistec.cn/photo/pics/smallApp/suspension/progress_7.png",
-					"http://bistec.cn/photo/pics/smallApp/suspension/progress_8.png",
-					"http://bistec.cn/photo/pics/smallApp/suspension/progress_9.png",
-					"http://bistec.cn/photo/pics/smallApp/drawCompress/progress_1.png",
-					"http://bistec.cn/photo/pics/smallApp/drawCompress/progress_2.png",
-					"http://bistec.cn/photo/pics/smallApp/drawCompress/progress_3.png",
-					"http://bistec.cn/photo/pics/smallApp/drawCompress/progress_4.png",
-					"http://bistec.cn/photo/pics/smallApp/drawCompress/progress_5.png",
-					"http://bistec.cn/photo/pics/smallApp/drawCompress/progress_6.png",
-					"http://bistec.cn/photo/pics/smallApp/drawCompress/progress_7.png",
-					"http://bistec.cn/photo/pics/smallApp/drawCompress/progress_8.png",
-					"http://bistec.cn/photo/pics/smallApp/drawCompress/progress_9.png",
+					"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/iconImage/highway_active.png",
+					"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/iconImage/wetland_active.png",
+					"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/iconImage/desert_active.png",
+					"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/suspension/progress_behind_1.png",
+					"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/suspension/progress_behind_2.png",
+					"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/suspension/progress_behind_3.png",
+					"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/suspension/progress_behind_4.png",
+					"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/suspension/progress_behind_5.png",
+					"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/suspension/progress_behind_6.png",
+					"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/suspension/progress_behind_7.png",
+					"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/suspension/progress_behind_8.png",
+					"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/suspension/progress_behind_9.png",
+					"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/heel/progress_1.png",
+					"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/heel/progress_2.png",
+					"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/heel/progress_3.png",
+					"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/heel/progress_4.png",
+					"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/heel/progress_5.png",
+					"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/heel/progress_6.png",
+					"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/heel/progress_7.png",
+					"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/heel/progress_8.png",
+					"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/heel/progress_9.png",
+					"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/suspension/progress_1.png",
+					"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/suspension/progress_2.png",
+					"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/suspension/progress_3.png",
+					"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/suspension/progress_4.png",
+					"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/suspension/progress_5.png",
+					"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/suspension/progress_6.png",
+					"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/suspension/progress_7.png",
+					"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/suspension/progress_8.png",
+					"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/suspension/progress_9.png",
+					"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/drawCompress/progress_1.png",
+					"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/drawCompress/progress_2.png",
+					"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/drawCompress/progress_3.png",
+					"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/drawCompress/progress_4.png",
+					"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/drawCompress/progress_5.png",
+					"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/drawCompress/progress_6.png",
+					"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/drawCompress/progress_7.png",
+					"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/drawCompress/progress_8.png",
+					"https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/drawCompress/progress_9.png",
 				]
 			}
 		},

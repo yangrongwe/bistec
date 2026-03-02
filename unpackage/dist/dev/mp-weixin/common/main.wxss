@@ -2080,7 +2080,7 @@
 }
 .uni-btn[type=primary][disabled], .uni-btn[type=primary][disabled][loading], .uni-btn[type=primary][disabled]:not([hover-class]):active {
   color: #fff;
-  border-color: #80adfa;
+  border-color: #80aefa;
   background-color: #94bcff;
 }
 .uni-btn[type=primary][plain] {
@@ -2140,7 +2140,7 @@
 }
 .uni-btn[type=success][disabled], .uni-btn[type=success][disabled][loading], .uni-btn[type=success][disabled]:not([hover-class]):active {
   color: #fff;
-  border-color: #89c794;
+  border-color: #89c795;
   background-color: #8cde9b;
 }
 .uni-btn[type=success][plain] {
@@ -2320,7 +2320,7 @@
 }
 .uni-btn[type=info][disabled], .uni-btn[type=info][disabled][loading], .uni-btn[type=info][disabled]:not([hover-class]):active {
   color: #fff;
-  border-color: #babcc1;
+  border-color: #babcc2;
   background-color: #c7c9ce;
 }
 .uni-btn[type=info][plain] {
@@ -2356,4 +2356,3 @@
 page {
   background-color: #212121;
 }
-

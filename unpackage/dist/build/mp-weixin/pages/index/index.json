@@ -1,6 +1,7 @@
 {
   "navigationStyle": "custom",
   "usingComponents": {
+    "uni-easyinput": "/uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput",
     "view-tabbar": "/components/tabbar/Tabbar",
     "bluetooth-content": "/components/bluetoothContent/BluetoothContent"
   }
