@@ -11439,9 +11439,12 @@ function sendData(modeIndex, that) {
   // 快速调节
   var kuai_su_tiao_jie = that.sceneListIndex; //1
 
-  console.log(la_ya);
+  // 原始数据计算
   var data = mode + (la_ya << 2) + (hou_xuan_jia << 6) + (ce_qing << 10) + (qian_xuan_jia << 14) + (kuai_su_tiao_jie << 18);
-  console.log("快速调节***************", data);
+
+  // ⚠激活标志位
+  data |= 1 << 20 | 0 << 21 | 0 << 22;
+  console.log("发送的数据***************", data);
   //  01 0110 0110 0110 0110 11
   var buff = new Uint8Array(12);
   buff[0] = 0xff;
@@ -11456,7 +11459,7 @@ function sendData(modeIndex, that) {
   buff[9] = 0xfe;
   buff[10] = 0xff;
   buff[11] = 0xff;
-  console.log("快速调节***********buff****", buff.buffer);
+  console.log("发送的数据***********buff****", buff.buffer);
   uni.writeBLECharacteristicValue({
     deviceId: uni.getStorageSync("deviceId"),
     // 设备ID，在【4】里获取到

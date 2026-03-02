@@ -153,6 +153,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
+var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 42));
+var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 44));
 var _store = _interopRequireDefault(__webpack_require__(/*! ../../store */ 33));
 var BluetoothSignal = function BluetoothSignal() {
   __webpack_require__.e(/*! require.ensure | components/bluetoothSignal/BluetoothSignal */ "components/bluetoothSignal/BluetoothSignal").then((function () {
@@ -246,6 +248,32 @@ var _default = {
     blueModal: BlueModal
   },
   methods: {
+    // 判断是否为鸿蒙系统
+    isHarmonyOS: function isHarmonyOS() {
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
+        return _regenerator.default.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                return _context.abrupt("return", new Promise(function (resolve) {
+                  uni.getSystemInfo({
+                    success: function success(res) {
+                      var isHarmony = res.system.includes('Harmony') || res.platform === 'harmony' || res.brand === 'huawei' && res.system.includes('6.0');
+                      resolve(isHarmony);
+                    },
+                    fail: function fail() {
+                      return resolve(false);
+                    }
+                  });
+                }));
+              case 1:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee);
+      }))();
+    },
     unConnect: function unConnect() {
       this.blueModalShow = false;
     },
@@ -427,7 +455,7 @@ var _default = {
       // }
       // console.log('res.devices[0]', res.devices);
       // 找到扫描二维码对应的蓝牙
-      console.log("搜索后追加链接");
+      // console.log("搜索后追加链接");
       if (!this.blueListFlag) {
         if (res.devices[0].name == this.scanName) {
           this.blueDeviceList.push(res.devices[0]);
@@ -444,7 +472,7 @@ var _default = {
         if (flag) {
           this.blueList.push(res.devices[0]);
         }
-        console.log("搜索后追加链接，this.blueList", this.blueList);
+        // console.log("搜索后追加链接，this.blueList", this.blueList);
       }
     },
     // 【4】连接设备
@@ -529,79 +557,154 @@ var _default = {
         }
       });
     },
-    // 【6】获取服务
+    // 【6】获取服务（兼容版）
     getServices: function getServices() {
-      var that = this;
-      uni.getBLEDeviceServices({
-        deviceId: uni.getStorageSync("deviceId"),
-        // 设备ID，在上一步【4】里获取
-        success: function success(res) {
-          console.error("获取服务成功", res.services);
-          that.uuidServices = res.services[0].uuid;
-          uni.setStorageSync("uuidServices", res.services[0].uuid);
-          that.getCharacteristics();
-        },
-        fail: function fail(err) {
-          console.error("获取服务失败");
-        }
-      });
-    },
-    // 【7】获取特征值
-    getCharacteristics: function getCharacteristics() {
-      var that = this;
-      uni.getBLEDeviceCharacteristics({
-        deviceId: uni.getStorageSync("deviceId"),
-        // 设备ID，在【4】里获取到
-        serviceId: uni.getStorageSync("uuidServices"),
-        // 服务UUID，在【6】里能获取到
-        success: function success(res) {
-          console.log("获取特征值成功", res);
-          console.log("characteristics.notify", res.characteristics[1].properties.notify);
-          that.characteristicId = res.characteristics[1].uuid;
-          uni.setStorageSync("writeCharacteristicId", res.characteristics[0].uuid);
-          uni.setStorageSync("characteristicId", res.characteristics[1].uuid);
-          setTimeout(function () {
-            that.notify();
-          }, 3000);
-        },
-        fail: function fail(err) {
-          console.log("获取特征值失败", err.errMsg);
-        }
-      });
-    },
-    // 【8】开启消息监听
-    notify: function notify() {
-      var that = this;
-      console.log(" this.uuidServices", this.uuidServices);
-      console.log(" this.characteristicId", this.characteristicId);
-      uni.notifyBLECharacteristicValueChange({
-        state: true,
-        deviceId: this.deviceId,
-        // 设备ID，在【4】里获取到
-        serviceId: this.uuidServices,
-        // 服务UUID，在【6】里能获取到
-        characteristicId: this.characteristicId,
-        // 特征值，在【7】里能获取到
-        success: function success(res) {
-          console.log("开启消息监听成功", res); // 接受消息的方法
-          that.listenValueChange();
-        },
-        fail: function fail(err) {
-          console.error("开启消息失败", err.errMsg);
-          uni.closeBLEConnection({
-            deviceId: device.deviceId,
-            success: function success(res) {
-              console.log("蓝牙连接已断开1", res);
-              _.connectedStatus = false;
-              _.initBlue();
-            },
-            fail: function fail(err) {
-              console.error("断开蓝牙连接失败", err);
-              // this.initBlue();
+      var _this2 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2() {
+        var that, isHarmony;
+        return _regenerator.default.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                that = _this2;
+                _context2.next = 3;
+                return _this2.isHarmonyOS();
+              case 3:
+                isHarmony = _context2.sent;
+                uni.getBLEDeviceServices({
+                  deviceId: uni.getStorageSync("deviceId"),
+                  success: function success(res) {
+                    console.log("获取服务成功", res.services);
+                    if (isHarmony && res.services.length > 1) {
+                      // 鸿蒙：尝试找 FFB0 服务
+                      var targetService = null;
+                      for (var i = 0; i < res.services.length; i++) {
+                        if (res.services[i].uuid.includes('FFB0')) {
+                          targetService = res.services[i];
+                          break;
+                        }
+                      }
+                      that.uuidServices = targetService ? targetService.uuid : res.services[0].uuid;
+                    } else {
+                      // iOS/Android：直接用第一个
+                      that.uuidServices = res.services[0].uuid;
+                    }
+                    uni.setStorageSync("uuidServices", that.uuidServices);
+                    that.getCharacteristics();
+                  },
+                  fail: function fail(err) {
+                    console.error("获取服务失败", err);
+                  }
+                });
+              case 5:
+              case "end":
+                return _context2.stop();
             }
-          });
-        }
-      });
+          }
+        }, _callee2);
+      }))();
+    },
+    // 【7】获取特征值（兼容版）
+    getCharacteristics: function getCharacteristics() {
+      var _this3 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3() {
+        var that, isHarmony;
+        return _regenerator.default.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                that = _this3;
+                _context3.next = 3;
+                return _this3.isHarmonyOS();
+              case 3:
+                isHarmony = _context3.sent;
+                uni.getBLEDeviceCharacteristics({
+                  deviceId: uni.getStorageSync("deviceId"),
+                  serviceId: uni.getStorageSync("uuidServices"),
+                  success: function success(res) {
+                    console.log("获取特征值成功", res);
+                    if (isHarmony) {
+                      var _res$characteristics$;
+                      // 鸿蒙特殊处理：固定使用索引，忽略属性
+                      uni.setStorageSync("writeCharacteristicId", res.characteristics[0].uuid);
+                      that.characteristicId = ((_res$characteristics$ = res.characteristics[1]) === null || _res$characteristics$ === void 0 ? void 0 : _res$characteristics$.uuid) || res.characteristics[0].uuid;
+                      uni.setStorageSync("characteristicId", that.characteristicId);
+                    } else {
+                      var _res$characteristics$2;
+                      // iOS/Android 正常处理：基于属性选择
+                      var writeCharId = '';
+                      var notifyCharId = '';
+                      res.characteristics.forEach(function (char) {
+                        if (char.properties.write || char.properties.writeNoResponse) {
+                          writeCharId = char.uuid;
+                        }
+                        if (char.properties.notify || char.properties.indicate) {
+                          notifyCharId = char.uuid;
+                        }
+                      });
+                      uni.setStorageSync("writeCharacteristicId", writeCharId || res.characteristics[0].uuid);
+                      that.characteristicId = notifyCharId || ((_res$characteristics$2 = res.characteristics[1]) === null || _res$characteristics$2 === void 0 ? void 0 : _res$characteristics$2.uuid) || res.characteristics[0].uuid;
+                      uni.setStorageSync("characteristicId", that.characteristicId);
+                    }
+                    setTimeout(function () {
+                      that.notify();
+                    }, 1000);
+                  },
+                  fail: function fail(err) {
+                    console.error("获取特征值失败", err.errMsg);
+                  }
+                });
+              case 5:
+              case "end":
+                return _context3.stop();
+            }
+          }
+        }, _callee3);
+      }))();
+    },
+    // 【8】开启消息监听（兼容版）
+    notify: function notify() {
+      var _this4 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee4() {
+        var that, isHarmony;
+        return _regenerator.default.wrap(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
+                that = _this4;
+                _context4.next = 3;
+                return _this4.isHarmonyOS();
+              case 3:
+                isHarmony = _context4.sent;
+                console.log("服务UUID:", _this4.uuidServices);
+                console.log("监听特征值:", _this4.characteristicId);
+                uni.notifyBLECharacteristicValueChange({
+                  state: true,
+                  deviceId: _this4.deviceId,
+                  serviceId: _this4.uuidServices,
+                  characteristicId: _this4.characteristicId,
+                  success: function success(res) {
+                    console.log("开启消息监听成功", res);
+                    that.listenValueChange();
+                  },
+                  fail: function fail(err) {
+                    console.error("开启消息失败", err);
+                    if (isHarmony) {
+                      // 鸿蒙：自动重试
+                      console.log('鸿蒙模式：5秒后重试...');
+                      setTimeout(function () {
+                        that.notify();
+                      }, 5000);
+                    }
+                  }
+                });
+              case 7:
+              case "end":
+                return _context4.stop();
+            }
+          }
+        }, _callee4);
+      }))();
     },
     // 将16进制的内容转成我们看得懂的字符串内容
     hexCharCodeToStr: function hexCharCodeToStr(hexCharCodeStr) {
@@ -630,7 +733,6 @@ var _default = {
         var dataView = new DataView(data.buffer);
 
         // 数据帧头帧尾校验
-
         var begin = dataView.getUint32(0, true);
         var end = dataView.getUint32(16, true);
         var regStatus = false;
@@ -641,9 +743,7 @@ var _default = {
           var firstCode = dataView.getUint32(4, true);
           var secondCode = dataView.getUint32(8, true);
           var thirdCode = dataView.getUint32(12, true);
-          // console.log("firstCode",firstCode);
-          // console.log(secondCode);
-          // 输出3设定
+
           // 阻尼设定
           that.DC = {
             FLCompress: thirdCode >> 28 & 0x0f,
@@ -656,14 +756,8 @@ var _default = {
             RRDraw: thirdCode >> 0 & 0x0f
           };
 
-          // console.log('that.DC', that.DC);
-
-          // 输出1设定
-          //工况，当前版本不需要
+          // 工况
           var workConditionInt = firstCode >> 2 & 0x07;
-          // 判断工况是否改变
-          // console.log('that.workConditionCode', that.workConditionCode);
-          // console.log('that.workConditionInt', workConditionInt);
           if (that.workConditionCode != workConditionInt) {
             that.workConditionCode = workConditionInt;
             that.workCondition = "";
@@ -685,7 +779,7 @@ var _default = {
             }
           }
 
-          //模式反馈
+          // 模式反馈
           var mode = firstCode >> 0 & 0x03;
           if (that.currentMode != mode) {
             _store.default.commit("changeSettingStatus", mode);
@@ -693,9 +787,7 @@ var _default = {
           }
           that.currentMode = mode;
 
-          //2576992456
-          // 1001,1001,1001,1001,11001000,11001000
-          // 输出2设定
+          // GX GY
           var GX = secondCode >> 8 & 0xff;
           var GY = secondCode >> 0 & 0xff;
           that.G = {
@@ -703,21 +795,11 @@ var _default = {
             GY: GY - 100
           };
 
-          // 前悬架
-          var frontSuspension = secondCode >> 16 & 0x0f; //9
-          // 侧倾
-          var heel = secondCode >> 20 & 0x0f; //9
-          // 后悬架
-          var behindSuspension = secondCode >> 24 & 0x0f; //9
-          // 拉压
-          var DC = secondCode >> 28 & 0x0f; //9
-
-          // 		console.log("secondCode",secondCode)
-          // console.log("前悬架",frontSuspension)
-          // console.log("侧倾",heel)
-          // console.log("后悬架",behindSuspension)
-          // console.log("拉压",DC)
-
+          // 其他参数
+          var frontSuspension = secondCode >> 16 & 0x0f;
+          var heel = secondCode >> 20 & 0x0f;
+          var behindSuspension = secondCode >> 24 & 0x0f;
+          var DC = secondCode >> 28 & 0x0f;
           uni.setStorageSync("setting", JSON.stringify({
             GX: GX,
             GY: GY,
@@ -726,9 +808,6 @@ var _default = {
             behindSuspension: behindSuspension,
             DC: DC
           }));
-          if (that.bluetoothCount % 5 == 0) {
-            // that.workCondition = workCondition;
-          }
           if (that.bluetoothCount % 100 == 0) {
             // 每隔1s监测蓝牙信号强度
             uni.getBLEDeviceRSSI({
@@ -736,19 +815,14 @@ var _default = {
               success: function success(res) {
                 console.log('蓝牙强度', res);
                 if (res.RSSI < 0 && res.RSSI >= -50) {
-                  //信号最强情况处理
                   that.bluetoothSignal = "https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/iconImage/bluetooth_5.png";
                 } else if (res.RSSI < -50 && res.RSSI >= -70) {
-                  //信号次强处理
                   that.bluetoothSignal = "https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/iconImage/bluetooth_4.png";
                 } else if (res.RSSI < -70 && res.RSSI >= -80) {
-                  //信号中等强度处理
                   that.bluetoothSignal = "https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/iconImage/bluetooth_3.png";
                 } else if (res.RSSI < -80 && res.RSSI >= -90) {
-                  //信号次弱强度处理
                   that.bluetoothSignal = "https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/iconImage/bluetooth_2.png";
                 } else if (res.RSSI < -90) {
-                  //信号最弱强度处理
                   uni.showToast({
                     title: "蓝牙信号弱",
                     duration: 1000
@@ -778,17 +852,13 @@ var _default = {
     //值变化限制
     changeLimit: function changeLimit(newval, old, maxlimit, max) {
       var minLimit = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0;
-      //新值大于旧值时
       if (newval > old) {
-        //若新值大于旧制加最大限制变化
         if (newval > old + maxlimit) {
-          //若旧值大于最大值
           if (old + maxlimit >= max) {
             newval = max;
           } else {
             newval = old + maxlimit;
           }
-          //若新值小于旧值减最小限制变化
         } else if (newval - old < minLimit) {
           newval = newval + minLimit;
         }
@@ -848,15 +918,11 @@ var _default = {
     }
   },
   created: function created() {
-    var _this2 = this;
-    // if (this.launch) {
-    // 	this.modalShow = true;
-    // }
-
+    var _this5 = this;
     //获取系统信息
     uni.getSystemInfo({
       success: function success(res) {
-        _this2.system = res;
+        _this5.system = res;
       }
     });
 
@@ -864,26 +930,11 @@ var _default = {
     this.menu = uni.getMenuButtonBoundingClientRect();
 
     //计算组件高度
-    this.statusBarHeight = this.system.statusBarHeight; //状态栏高度
-    this.menuHeight = this.menu.height; //胶囊高度
-    this.menuTop = this.menu.top; //胶囊与顶部的距离
-    //导航栏高度= （胶囊顶部距离-状态栏高度） x 2 + 胶囊的高度
+    this.statusBarHeight = this.system.statusBarHeight;
+    this.menuHeight = this.menu.height;
+    this.menuTop = this.menu.top;
     this.navigatorHeight = (this.menu.top - this.system.statusBarHeight) * 2 + this.menu.height;
-    //总高度 = 状态栏的高度 + 导航栏高度
     this.totalHeight = this.statusBarHeight + this.navigatorHeight;
-
-    // if (this.isOk ) {
-    // 	console.log("this.$store.state.blueStatus**************"+this.$store.state.blueStatus)
-    // if(!this.$store.state.blueStatus){
-    // 触发蓝牙扫描
-    // this.initBlue();
-    // this.changeFakeData();
-    // }else{
-    // 	this.reconnect();
-    // 判断蓝牙是否连接过，如果连接过就直接访问
-    // 如果未连接弹出模态框
-
-    // }
     if (this.isOk) {
       console.log("==========================created================", this.isOk);
       if (uni.getStorageSync("deviceId")) {
