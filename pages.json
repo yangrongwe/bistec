@@ -27,6 +27,12 @@
 					"style": {
 						"navigationStyle": "custom"
 					}
+				},
+				{
+					"path": "profile/Profile",
+					"style": {
+						"navigationStyle": "custom"
+					}
 				}
 			]
 		}

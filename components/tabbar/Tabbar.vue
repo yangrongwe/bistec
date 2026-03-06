@@ -89,6 +89,13 @@ export default {
             "https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/iconImage/iconSettings_active.png",
           path: "/page_setting/setting/Setting",
         },
+		{
+		  text: "",
+		  icon: "https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/iconImage/person.png",
+		  icon_a:
+		    "https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/iconImage/person_active.png",
+		  path: "/page_setting/profile/Profile",
+		},
       ],
     };
   },
@@ -97,7 +104,8 @@ export default {
     tabbarChange(item, index) {
       //if(this.$store.state.settingStatus && item.text){
 
-      if (index == 3) {
+      if (index == 3 || index == 4) {
+		console.log("item.path",item)
         uni.navigateTo({
           url: item.path,
         });
@@ -105,16 +113,6 @@ export default {
         sendData(index, this);
         store.commit("changeSettingStatus", index);
       }
-      //}
-      // if(item.path != "/page_setting/setting/Setting"){
-      // 	uni.switchTab({
-      // 		url: item.path
-      // 	})
-      // }else{
-      // 	uni.redirectTo({
-      // 		url:item.path
-      // 	})
-      // }
     },
   },
 };
