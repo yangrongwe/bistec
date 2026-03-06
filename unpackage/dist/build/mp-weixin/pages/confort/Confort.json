@@ -1,7 +1,0 @@
-{
-  "navigationStyle": "custom",
-  "usingComponents": {
-    "view-tabbar": "/components/tabbar/Tabbar",
-    "bluetooth-content": "/components/bluetoothContent/BluetoothContent"
-  }
-}

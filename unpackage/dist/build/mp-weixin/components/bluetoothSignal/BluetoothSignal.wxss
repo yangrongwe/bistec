@@ -1,8 +1,0 @@
-.bluetooth-signal-box.data-v-7c440560{position:relative;width:95rpx;height:225rpx}.bluetooth-signal-box .signal-back.data-v-7c440560{position:absolute;left:0;top:0;width:100%;height:100%}.bluetooth-signal-box .left.data-v-7c440560{left:10rpx}.bluetooth-signal-box .right.data-v-7c440560{right:10rpx}.bluetooth-signal-box .progress-back-first.data-v-7c440560,
-.bluetooth-signal-box .progress-back-second.data-v-7c440560,
-.bluetooth-signal-box .progress-first.data-v-7c440560,
-.bluetooth-signal-box .progress-second.data-v-7c440560{position:absolute;width:34rpx;height:197rpx}.bluetooth-signal-box .progress-back-first.data-v-7c440560,
-.bluetooth-signal-box .progress-first.data-v-7c440560{top:19rpx}.bluetooth-signal-box .progress-back-second.data-v-7c440560,
-.bluetooth-signal-box .progress-second.data-v-7c440560{top:11rpx}.bluetooth-signal-box .progress-back-first.data-v-7c440560,
-.bluetooth-signal-box .progress-back-second.data-v-7c440560{z-index:1}.bluetooth-signal-box .progress-first.data-v-7c440560,
-.bluetooth-signal-box .progress-second.data-v-7c440560{z-index:2}
