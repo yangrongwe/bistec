@@ -1,49 +1,56 @@
 {
-	"pages": [{
-			"path": "pages/index/index",
-			"style": {
-				"navigationStyle": "custom"
-			}
-		},
-		{
-			"path": "pages/confort/Confort",
-			"style": {
-				"navigationStyle": "custom"
-			}
-		},
-		{
-			"path": "pages/normal/Normal",
-			"style": {
-				"navigationStyle": "custom"
-			}
-		}
-	],
-	"subPackages": [
-		{
-			"root": "page_setting",
-			"pages": [
-				{
-					"path": "setting/Setting",
-					"style": {
-						"navigationStyle": "custom"
-					}
-				},
-				{
-					"path": "profile/Profile",
-					"style": {
-						"navigationStyle": "custom"
-					}
-				}
-			]
-		}
-	],
-	"globalStyle": {
-		"navigationBarTextStyle": "white",
-		"navigationBarTitleText": "BIS",
-		"navigationBarBackgroundColor": "#001232",
-		"backgroundColor": "#F8F8F8",
-		"app-plus": {
-			"background": "#efeff4"
-		}
-	}
+  "pages": [
+    {
+      "path": "pages/ble/index",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/confort/Confort",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/normal/Normal",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    }
+  ],
+  "subPackages": [
+    {
+      "root": "page_setting",
+      "pages": [
+        {
+          "path": "setting/Setting",
+          "style": {
+            "navigationStyle": "custom"
+          }
+        },
+        {
+          "path": "profile/Profile",
+          "style": {
+            "navigationStyle": "custom"
+          }
+        }
+      ]
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "BIS",
+    "navigationBarBackgroundColor": "#001232",
+    "backgroundColor": "#F8F8F8",
+    "app-plus": {
+      "background": "#efeff4"
+    }
+  }
 }
