@@ -71,11 +71,9 @@
             <view class="code-content">
               <text class="code-label">ACTIVATION CODE</text>
               <view class="code-input-container">
-                <template
-                  v-for="(part, index) in activationCodeParts"
-                  :key="index"
-                >
+                <template v-for="(part, index) in activationCodeParts">
                   <input
+                    :key="`input-${index}`"
                     v-model="activationCodeParts[index]"
                     class="code-input"
                     maxlength="4"
@@ -86,7 +84,12 @@
                     placeholder-style="color: #475569;"
                     :ref="`codeInput${index}`"
                   />
-                  <view v-if="index < 3" class="code-dash">-</view>
+                  <view
+                    v-if="index < 3"
+                    :key="`dash-${index}`"
+                    class="code-dash"
+                    >-</view
+                  >
                 </template>
               </view>
             </view>
