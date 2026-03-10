@@ -167,6 +167,7 @@
 
 <script>
 import BlueModal from "@/components/modal/BlueModal.vue";
+import { sendData } from "@/util/sendInfo.js";
 
 export default {
   components: {
@@ -312,7 +313,9 @@ export default {
         success: (res) => {
           console.log("获取服务成功", res.services);
           if (res.services.length > 0) {
-            this.getBLECharacteristics(deviceId, res.services[0].uuid);
+            const uuidServices = res.services[0].uuid;
+            uni.setStorageSync("uuidServices", uuidServices);
+            this.getBLECharacteristics(deviceId, uuidServices);
           }
         },
         fail: (err) => {
@@ -328,7 +331,15 @@ export default {
         success: (res) => {
           console.log("获取特征成功", res.characteristics);
           // 遍历特征，找到可读写的特征
+          let writeCharId = "";
           res.characteristics.forEach((characteristic) => {
+            if (
+              characteristic.properties.write ||
+              characteristic.properties.writeNoResponse
+            ) {
+              writeCharId = characteristic.uuid;
+              uni.setStorageSync("writeCharacteristicId", writeCharId);
+            }
             if (characteristic.properties.notify) {
               // 监听特征值变化
               uni.notifyBLECharacteristicValueChange({
@@ -346,6 +357,11 @@ export default {
               });
             }
           });
+          // 如果没有找到可写特征，使用第一个特征
+          if (!writeCharId && res.characteristics.length > 0) {
+            writeCharId = res.characteristics[0].uuid;
+            uni.setStorageSync("writeCharacteristicId", writeCharId);
+          }
         },
         fail: (err) => {
           console.error("获取特征失败", err);
@@ -421,6 +437,14 @@ export default {
           type: "info",
           text: "激活成功！设备已就绪",
         };
+
+        // 调用sendData方法，初始化所有参数为0，modeIndex为1
+        const mockThat = {
+          drawProgress: 0,
+          gaugeList: [{ progress: 0 }, { progress: 0 }, { progress: 0 }],
+          sceneListIndex: 0,
+        };
+        sendData(1, mockThat);
 
         // 跳转前关闭监听，避免重复监听
         try {
