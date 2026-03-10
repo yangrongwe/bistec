@@ -71,26 +71,25 @@
             <view class="code-content">
               <text class="code-label">ACTIVATION CODE</text>
               <view class="code-input-container">
-                <template v-for="(part, index) in activationCodeParts">
-                  <input
-                    :key="`input-${index}`"
-                    v-model="activationCodeParts[index]"
-                    class="code-input"
-                    maxlength="4"
-                    @input="handleCodeInput(index)"
-                    @keydown="handleCodeKeydown(index, $event)"
-                    type="text"
-                    placeholder="XXXX"
-                    placeholder-style="color: #475569;"
-                    :ref="`codeInput${index}`"
-                  />
-                  <view
-                    v-if="index < 3"
-                    :key="`dash-${index}`"
-                    class="code-dash"
-                    >-</view
-                  >
-                </template>
+                <input
+                  v-for="(part, index) in activationCodeParts"
+                  :key="`input-${index}`"
+                  v-model="activationCodeParts[index]"
+                  class="code-input"
+                  maxlength="4"
+                  @input="handleCodeInput(index)"
+                  @keydown="handleCodeKeydown(index, $event)"
+                  type="text"
+                  placeholder="XXXX"
+                  placeholder-style="color: #475569;"
+                  :ref="`codeInput${index}`"
+                />
+                <view
+                  v-for="index in 3"
+                  :key="`dash-${index}`"
+                  class="code-dash"
+                  >-</view
+                >
               </view>
             </view>
           </view>
@@ -710,6 +709,7 @@ export default {
   justify-content: center;
   gap: 16rpx;
   margin-top: 20rpx;
+  flex-wrap: nowrap;
 }
 
 .code-input {
