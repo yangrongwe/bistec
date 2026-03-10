@@ -72,24 +72,52 @@
               <text class="code-label">ACTIVATION CODE</text>
               <view class="code-input-container">
                 <input
-                  v-for="(part, index) in activationCodeParts"
-                  :key="`input-${index}`"
-                  v-model="activationCodeParts[index]"
+                  v-model="activationCodeParts[0]"
                   class="code-input"
                   maxlength="4"
-                  @input="handleCodeInput(index)"
-                  @keydown="handleCodeKeydown(index, $event)"
+                  @input="handleCodeInput(0)"
+                  @keydown="handleCodeKeydown(0, $event)"
                   type="text"
                   placeholder="XXXX"
                   placeholder-style="color: #475569;"
-                  :ref="`codeInput${index}`"
+                  :ref="`codeInput0`"
                 />
-                <view
-                  v-for="index in 3"
-                  :key="`dash-${index}`"
-                  class="code-dash"
-                  >-</view
-                >
+                <view class="code-dash">-</view>
+                <input
+                  v-model="activationCodeParts[1]"
+                  class="code-input"
+                  maxlength="4"
+                  @input="handleCodeInput(1)"
+                  @keydown="handleCodeKeydown(1, $event)"
+                  type="text"
+                  placeholder="XXXX"
+                  placeholder-style="color: #475569;"
+                  :ref="`codeInput1`"
+                />
+                <view class="code-dash">-</view>
+                <input
+                  v-model="activationCodeParts[2]"
+                  class="code-input"
+                  maxlength="4"
+                  @input="handleCodeInput(2)"
+                  @keydown="handleCodeKeydown(2, $event)"
+                  type="text"
+                  placeholder="XXXX"
+                  placeholder-style="color: #475569;"
+                  :ref="`codeInput2`"
+                />
+                <view class="code-dash">-</view>
+                <input
+                  v-model="activationCodeParts[3]"
+                  class="code-input"
+                  maxlength="4"
+                  @input="handleCodeInput(3)"
+                  @keydown="handleCodeKeydown(3, $event)"
+                  type="text"
+                  placeholder="XXXX"
+                  placeholder-style="color: #475569;"
+                  :ref="`codeInput3`"
+                />
               </view>
             </view>
           </view>
