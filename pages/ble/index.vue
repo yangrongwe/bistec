@@ -70,13 +70,25 @@
             <view class="code-bg-gradient"></view>
             <view class="code-content">
               <text class="code-label">ACTIVATION CODE</text>
-              <uni-easyinput
-                v-model="activationCode"
-                class="code-value"
-                placeholder="请输入激活码"
-                placeholder-style="color: #475569;"
-                :styles="{ color: 'white' }"
-              ></uni-easyinput>
+              <view class="code-input-container">
+                <template
+                  v-for="(part, index) in activationCodeParts"
+                  :key="index"
+                >
+                  <input
+                    v-model="activationCodeParts[index]"
+                    class="code-input"
+                    maxlength="4"
+                    @input="handleCodeInput(index)"
+                    @keydown="handleCodeKeydown(index, $event)"
+                    type="text"
+                    placeholder="XXXX"
+                    placeholder-style="color: #475569;"
+                    :ref="`codeInput${index}`"
+                  />
+                  <view v-if="index < 3" class="code-dash">-</view>
+                </template>
+              </view>
             </view>
           </view>
 
@@ -134,6 +146,7 @@ export default {
     return {
       isBluetoothConnected: false,
       activationCode: "",
+      activationCodeParts: ["", "", "", ""],
       message: {
         type: null, // 'error' 或 'info'
         text: "",
@@ -237,11 +250,21 @@ export default {
           console.log("蓝牙设备连接成功", device);
           this.isBluetoothConnected = true;
           this.connectedDeviceId = device.deviceId;
+
+          // 存储设备信息到本地，供首页使用
+          uni.setStorageSync("deviceId", device.deviceId);
+          uni.setStorageSync("scanName", device.name);
+
           this.blueModalShow = false;
           this.message = {
             type: "info",
             text: "蓝牙设备连接成功",
           };
+
+          // 连接成功后获取服务
+          setTimeout(() => {
+            this.getBLEServices(device.deviceId);
+          }, 500);
         },
         fail: (err) => {
           console.error("蓝牙设备连接失败", err);
@@ -252,13 +275,132 @@ export default {
         },
       });
     },
+    // 获取蓝牙设备服务
+    getBLEServices(deviceId) {
+      uni.getBLEDeviceServices({
+        deviceId: deviceId,
+        success: (res) => {
+          console.log("获取服务成功", res.services);
+          if (res.services.length > 0) {
+            this.getBLECharacteristics(deviceId, res.services[0].uuid);
+          }
+        },
+        fail: (err) => {
+          console.error("获取服务失败", err);
+        },
+      });
+    },
+    // 获取蓝牙设备特征
+    getBLECharacteristics(deviceId, serviceId) {
+      uni.getBLEDeviceCharacteristics({
+        deviceId: deviceId,
+        serviceId: serviceId,
+        success: (res) => {
+          console.log("获取特征成功", res.characteristics);
+          // 遍历特征，找到可读写的特征
+          res.characteristics.forEach((characteristic) => {
+            if (characteristic.properties.notify) {
+              // 监听特征值变化
+              uni.notifyBLECharacteristicValueChange({
+                deviceId: deviceId,
+                serviceId: serviceId,
+                characteristicId: characteristic.uuid,
+                state: true,
+                success: () => {
+                  console.log("开启监听成功");
+                  this.listenValueChange();
+                },
+                fail: (err) => {
+                  console.error("开启监听失败", err);
+                },
+              });
+            }
+          });
+        },
+        fail: (err) => {
+          console.error("获取特征失败", err);
+        },
+      });
+    },
+    // 监听蓝牙设备值变化
+    listenValueChange() {
+      uni.onBLECharacteristicValueChange((res) => {
+        console.log("监听蓝牙设备传过来的值:", res.value);
+
+        // 打印值的详细信息
+        var data = new Uint8Array(res.value);
+        console.log("值的字节数组:", data);
+        console.log("值的长度:", data.length);
+
+        // 尝试转换为字符串
+        try {
+          let str = "";
+          for (let i = 0; i < data.length; i++) {
+            str += String.fromCharCode(data[i]);
+          }
+          console.log("转换为字符串:", str);
+        } catch (e) {
+          console.error("转换字符串失败:", e);
+        }
+      });
+    },
+    // 处理激活码输入
+    handleCodeInput(index) {
+      const currentPart = this.activationCodeParts[index];
+
+      // 如果当前输入框已满，自动跳转到下一个
+      if (currentPart.length === 4 && index < 3) {
+        this.$nextTick(() => {
+          // 在微信小程序中，通过ref获取输入框并设置焦点
+          const nextInput = this.$refs[`codeInput${index + 1}`];
+          if (nextInput && nextInput[0]) {
+            nextInput[0].focus();
+          }
+        });
+      }
+
+      // 更新激活码
+      this.updateActivationCode();
+    },
+    // 处理激活码删除
+    handleCodeKeydown(index, event) {
+      const currentPart = this.activationCodeParts[index];
+
+      // 如果当前输入框为空且按下退格键，跳转到上一个输入框
+      if (currentPart.length === 0 && index > 0 && event.key === "Backspace") {
+        event.preventDefault();
+        this.$nextTick(() => {
+          // 在微信小程序中，通过ref获取输入框并设置焦点
+          const prevInput = this.$refs[`codeInput${index - 1}`];
+          if (prevInput && prevInput[0]) {
+            prevInput[0].focus();
+          }
+        });
+      }
+
+      // 更新激活码
+      this.updateActivationCode();
+    },
+    // 更新激活码
+    updateActivationCode() {
+      this.activationCode = this.activationCodeParts.join("-");
+    },
     handleActivate() {
       if (this.isBluetoothConnected) {
         this.message = {
           type: "info",
           text: "激活成功！设备已就绪",
         };
-        // 3秒后跳转到主页
+
+        // 跳转前关闭监听，避免重复监听
+        try {
+          uni.offBLECharacteristicValueChange();
+          console.log("已关闭蓝牙监听");
+        } catch (e) {
+          console.error("关闭监听失败", e);
+        }
+
+        // 1秒后跳转到主页
         setTimeout(() => {
           uni.navigateTo({
             url: "/pages/index/index",
@@ -559,54 +701,47 @@ export default {
   color: #94a3b8;
 }
 
-.code-value {
-  font-size: 48rpx;
+.code-input-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16rpx;
+  margin-top: 20rpx;
+}
+
+.code-input {
+  width: 120rpx;
+  height: 60rpx;
+  font-size: 32rpx;
   font-family: "Courier New", monospace;
-  letter-spacing: 8rpx;
   color: #22d3ee;
   font-weight: bold;
   text-shadow: 0 0 20rpx rgba(34, 211, 238, 0.5);
   background: transparent;
-  border: none;
-  outline: none;
+  border: 2px solid rgba(6, 182, 212, 0.3);
+  border-radius: 12rpx;
   text-align: center;
-  width: 100%;
+  outline: none;
+  padding: 0;
+  transition: all 0.3s ease;
 }
 
-.uni-easyinput.code-value {
-  font-size: 48rpx;
-  font-family: "Courier New", monospace;
-  letter-spacing: 8rpx;
+.code-input:focus {
+  border-color: #22d3ee;
+  box-shadow: 0 0 20rpx rgba(34, 211, 238, 0.5);
+}
+
+.code-input::placeholder {
+  color: #475569;
+  font-weight: normal;
+  text-shadow: none;
+}
+
+.code-dash {
+  font-size: 32rpx;
   color: #22d3ee;
   font-weight: bold;
   text-shadow: 0 0 20rpx rgba(34, 211, 238, 0.5);
-  background: transparent;
-  border: none;
-  outline: none;
-  text-align: center;
-  width: 100%;
-}
-
-.uni-easyinput.code-value .uni-easyinput__input {
-  font-size: 48rpx !important;
-  font-family: "Courier New", monospace !important;
-  letter-spacing: 8rpx !important;
-  color: #22d3ee !important;
-  font-weight: bold !important;
-  text-shadow: 0 0 20rpx rgba(34, 211, 238, 0.5) !important;
-  background: transparent !important;
-  border: none !important;
-  outline: none !important;
-  text-align: center !important;
-  width: 100% !important;
-  padding: 0 !important;
-  margin: 0 !important;
-}
-
-.uni-easyinput.code-value {
-  border: none !important;
-  background: transparent !important;
-  box-shadow: none !important;
 }
 
 .btn-activate {
