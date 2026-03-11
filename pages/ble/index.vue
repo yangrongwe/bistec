@@ -10,7 +10,10 @@
       <!-- 蓝牙连接卡片 -->
       <view class="bluetooth-card">
         <!-- 发光效果 -->
-        <view v-if="bluetoothManager.getConnectedStatus()" class="glow-effect"></view>
+        <view
+          v-if="bluetoothManager.getConnectedStatus()"
+          class="glow-effect"
+        ></view>
 
         <view class="card-content">
           <view class="bluetooth-info">
@@ -21,7 +24,10 @@
               ]"
             >
               <text class="icon">📡</text>
-              <view v-if="bluetoothManager.getConnectedStatus()" class="ping-effect"></view>
+              <view
+                v-if="bluetoothManager.getConnectedStatus()"
+                class="ping-effect"
+              ></view>
             </view>
             <view class="bluetooth-text">
               <text class="device-name">蓝牙设备</text>
@@ -38,7 +44,9 @@
                     bluetoothManager.getConnectedStatus() ? 'connected' : '',
                   ]"
                 >
-                  {{ bluetoothManager.getConnectedStatus() ? "已连接" : "未连接" }}
+                  {{
+                    bluetoothManager.getConnectedStatus() ? "已连接" : "未连接"
+                  }}
                 </text>
               </view>
             </view>
@@ -131,7 +139,10 @@
               bluetoothManager.getConnectedStatus() ? 'enabled' : 'disabled',
             ]"
           >
-            <view v-if="bluetoothManager.getConnectedStatus()" class="shimmer-effect"></view>
+            <view
+              v-if="bluetoothManager.getConnectedStatus()"
+              class="shimmer-effect"
+            ></view>
             <text class="btn-text">激活设备</text>
           </button>
         </view>
@@ -293,7 +304,8 @@ export default {
         console.log("监听蓝牙设备传过来的值:", data);
 
         // 验证蓝牙设备是否正确
-        const isDeviceValid = this.bluetoothManager.validateBluetoothDevice(data);
+        const isDeviceValid =
+          this.bluetoothManager.validateBluetoothDevice(data);
         if (!isDeviceValid) {
           // 设备验证失败，显示错误信息
           this.message = {
@@ -304,7 +316,8 @@ export default {
         }
 
         // 解析激活状态
-        const activationStatus = this.bluetoothManager.parseActivationStatus(data);
+        const activationStatus =
+          this.bluetoothManager.parseActivationStatus(data);
 
         if (activationStatus === 1) {
           // 激活状态为1，加载loading并跳转到主页
@@ -663,7 +676,7 @@ export default {
   );
   border: 1px solid rgba(6, 182, 212, 0.2);
   border-radius: 24rpx;
-  padding: 40rpx;
+  padding: 40rpx 20rpx;
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -684,7 +697,7 @@ export default {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 16rpx;
+  gap: 12rpx;
 }
 
 .code-label {
@@ -696,7 +709,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16rpx;
+  gap: 12rpx;
   margin-top: 20rpx;
   flex-wrap: nowrap;
 }
