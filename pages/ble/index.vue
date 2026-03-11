@@ -421,35 +421,86 @@ export default {
     updateActivationCode() {
       this.activationCode = this.activationCodeParts.join("-");
     },
-    handleActivate() {
-      if (this.bluetoothManager.getConnectedStatus()) {
-        this.message = {
-          type: "info",
-          text: "激活成功！设备已就绪",
-        };
-
-        // 调用sendData方法，初始化所有参数为0，modeIndex为1
-        const mockThat = {
-          drawProgress: 0,
-          gaugeList: [{ progress: 0 }, { progress: 0 }, { progress: 0 }],
-          sceneListIndex: 0,
-        };
-        sendData(1, mockThat);
-
-        // 跳转前关闭监听，避免重复监听
+    async handleActivate() {
+      if (this.bluetoothManager.getConnectedStatus() && this.hasValidData) {
         try {
-          uni.offBLECharacteristicValueChange();
-          console.log("已关闭蓝牙监听");
-        } catch (e) {
-          console.error("关闭监听失败", e);
-        }
-
-        // 1秒后跳转到主页
-        setTimeout(() => {
-          uni.navigateTo({
-            url: "/pages/index/index",
+          // 显示加载中
+          uni.showLoading({
+            title: "正在激活...",
+            mask: true,
           });
-        }, 1000);
+
+          // 调用激活API
+          const response = await new Promise((resolve, reject) => {
+            uni.request({
+              url: "http://localhost:8290/api/activate",
+              method: "POST",
+              header: {
+                "Content-Type": "application/json",
+              },
+              data: {
+                wechatId: "wx123456",
+                lat: 31.49592,
+                lng: 120.3111,
+                activationCode: this.activationCode,
+                deviceId: this.bluetoothManager.deviceId,
+                bluetoothName: this.bluetoothManager.scanName,
+              },
+              success: (res) => {
+                resolve(res);
+              },
+              fail: (err) => {
+                reject(err);
+              },
+            });
+          });
+
+          uni.hideLoading();
+
+          if (response.statusCode === 200 && response.data) {
+            // 激活成功
+            this.message = {
+              type: "info",
+              text: "激活成功！设备已就绪",
+            };
+
+            // 调用sendData方法，初始化所有参数为0，modeIndex为1
+            const mockThat = {
+              drawProgress: 0,
+              gaugeList: [{ progress: 0 }, { progress: 0 }, { progress: 0 }],
+              sceneListIndex: 0,
+            };
+            sendData(1, mockThat);
+
+            // 跳转前关闭监听，避免重复监听
+            try {
+              uni.offBLECharacteristicValueChange();
+              console.log("已关闭蓝牙监听");
+            } catch (e) {
+              console.error("关闭监听失败", e);
+            }
+
+            // 1秒后跳转到主页
+            setTimeout(() => {
+              uni.navigateTo({
+                url: "/pages/index/index",
+              });
+            }, 1000);
+          } else {
+            // 激活失败
+            this.message = {
+              type: "error",
+              text: response.data?.message || "激活失败，请检查激活码是否正确",
+            };
+          }
+        } catch (err) {
+          uni.hideLoading();
+          console.error("激活API调用失败", err);
+          this.message = {
+            type: "error",
+            text: "激活失败，网络连接异常",
+          };
+        }
       }
     },
     closeMessage() {
