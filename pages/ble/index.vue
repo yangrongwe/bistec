@@ -276,8 +276,19 @@ export default {
         this.blueModalShow = false;
         this.message = {
           type: "info",
-          text: "蓝牙设备连接成功",
+          text: "蓝牙设备连接成功，正在验证设备...",
         };
+
+        // 设置设备验证超时
+        const validationTimeout = setTimeout(() => {
+          // 如果超时还没有收到有效数据，显示错误信息
+          if (this.bluetoothManager.getConnectedStatus()) {
+            this.message = {
+              type: "error",
+              text: "未检测到有效设备数据，请检查设备是否正确",
+            };
+          }
+        }, 5000); // 5秒超时
 
         // 连接成功后获取服务和特征值
         setTimeout(async () => {
@@ -285,9 +296,14 @@ export default {
             await this.bluetoothManager.getServices();
             await this.bluetoothManager.getCharacteristics();
             await this.bluetoothManager.notify();
-            this.listenValueChange();
+            this.listenValueChange(validationTimeout);
           } catch (err) {
             console.error("获取服务或特征值失败", err);
+            clearTimeout(validationTimeout);
+            this.message = {
+              type: "error",
+              text: "蓝牙设备初始化失败",
+            };
           }
         }, 500);
       } catch (err) {
@@ -299,9 +315,12 @@ export default {
       }
     },
     // 监听蓝牙设备值变化
-    listenValueChange() {
+    listenValueChange(validationTimeout) {
       this.bluetoothManager.listenValueChange((data) => {
         console.log("监听蓝牙设备传过来的值:", data);
+
+        // 清除验证超时计时器
+        clearTimeout(validationTimeout);
 
         // 验证蓝牙设备是否正确
         const isDeviceValid =
