@@ -378,6 +378,49 @@ export default {
         console.log("值的字节数组:", data);
         console.log("值的长度:", data.length);
 
+        // 数据帧头帧尾校验
+        var dataView = new DataView(data.buffer);
+        const begin = dataView.getUint32(0, true);
+        const end = dataView.getUint32(16, true);
+        let regStatus = false;
+
+        if (begin == 4278124543 && end == 4294967038) {
+          regStatus = true;
+        }
+
+        if (dataView && regStatus) {
+          const firstCode = dataView.getUint32(4, true);
+          // 判断5-7位是否为1（从0开始计数，第5-7位对应二进制位2-4）
+          let activationStatus = (firstCode >> 2) & 0x07;
+          console.log("激活状态:", activationStatus);
+
+          if (activationStatus === 1) {
+            // 激活状态为1，加载loading并跳转到主页
+            uni.showLoading({
+              title: "加载中...",
+              mask: true,
+            });
+            setTimeout(() => {
+              uni.hideLoading();
+              uni.navigateTo({
+                url: "/pages/index/index",
+              });
+            }, 1000);
+          } else if (activationStatus === 0) {
+            // 激活状态为0，显示未激活提示
+            this.message = {
+              type: "error",
+              text: "当前设备未激活请输入激活码激活",
+            };
+          }
+        } else {
+          // 帧头帧尾校验失败，显示错误信息
+          this.message = {
+            type: "error",
+            text: "请确认连接的蓝牙是否正确，当前无有效数据",
+          };
+        }
+
         // 尝试转换为字符串
         try {
           let str = "";
