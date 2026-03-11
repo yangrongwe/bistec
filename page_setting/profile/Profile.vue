@@ -31,9 +31,25 @@
               <text class="label">激活时间</text>
               <text class="value">{{ p.time }}</text>
             </view>
+            <view class="divider"></view>
+            <view class="row">
+              <text class="label">蓝牙名称</text>
+              <text class="value">{{ p.bluetoothName || "未知" }}</text>
+            </view>
+            <view class="divider"></view>
+            <view class="row">
+              <text class="label">DeviceId</text>
+              <text class="value">{{ p.deviceId || "未知" }}</text>
+            </view>
           </view>
           <view class="actions">
-            <button v-if="p.sn === connectedDeviceName" class="unbind" @tap="unbind(i)">去激活</button>
+            <button
+              v-if="p.sn === connectedDeviceName"
+              class="unbind"
+              @tap="unbind(i)"
+            >
+              去激活
+            </button>
           </view>
         </view>
         <view v-if="!products.length" class="empty">暂无绑定产品</view>
@@ -65,12 +81,16 @@ export default {
           sn: "SN-20260101-0001",
           code: "ABCD-1234",
           time: "2026-03-06 10:20:30",
+          bluetoothName: "BIS-001",
+          deviceId: "12:34:56:78:90:AB",
         },
         {
           id: "2",
           sn: "SN-20260101-0002",
           code: "EFGH-5678",
           time: "2026-03-06 10:22:10",
+          bluetoothName: "BIS-002",
+          deviceId: "CD:EF:12:34:56:78",
         },
       ],
     };
@@ -131,7 +151,8 @@ export default {
         this.statusBarHeight = res.statusBarHeight;
         this.menuHeight = menu.height;
         this.menuTop = menu.top;
-        this.navigatorHeight = (menu.top - res.statusBarHeight) * 2 + menu.height;
+        this.navigatorHeight =
+          (menu.top - res.statusBarHeight) * 2 + menu.height;
         this.totalHeight = this.statusBarHeight + this.navigatorHeight;
         this.backTop = this.statusBarHeight + this.navigatorHeight / 2 - 13;
         this.titleTop = this.statusBarHeight + (this.navigatorHeight - 24) / 2;
