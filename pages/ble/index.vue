@@ -209,7 +209,61 @@ export default {
       }
     },
   },
+  mounted() {
+    // 页面加载时检查蓝牙状态
+    this.checkBluetoothStatus();
+    // 获取微信 ID
+    this.getWechatId();
+  },
   methods: {
+    // 获取微信 ID
+    getWechatId() {
+      // 先检查本地存储是否已有微信 ID
+      const storedWechatId = uni.getStorageSync("wechatId");
+      if (storedWechatId) {
+        console.log("已存在微信 ID:", storedWechatId);
+        return;
+      }
+
+      // 调用微信登录获取 openid
+      uni.login({
+        success: (res) => {
+          if (res.code) {
+            // 这里需要根据实际的后端接口来获取 openid
+            // 示例：调用后端接口获取 openid
+            uni.request({
+              url: "http://localhost:8290/api/wechat/login",
+              method: "POST",
+              data: {
+                code: res.code,
+              },
+              success: (response) => {
+                if (response.statusCode === 200 && response.data?.openid) {
+                  const wechatId = response.data.openid;
+                  uni.setStorageSync("wechatId", wechatId);
+                  console.log("获取微信 ID 成功:", wechatId);
+                }
+              },
+              fail: (err) => {
+                console.error("获取微信 ID 失败", err);
+              },
+            });
+          }
+        },
+        fail: (err) => {
+          console.error("微信登录失败", err);
+        },
+      });
+    },
+    // 检查蓝牙状态
+    checkBluetoothStatus() {
+      if (this.bluetoothManager.getConnectedStatus()) {
+        this.message = {
+          type: "info",
+          text: "蓝牙设备已连接",
+        };
+      }
+    },
     toggleBluetooth() {
       if (this.bluetoothManager.getConnectedStatus()) {
         // 断开蓝牙连接
@@ -430,6 +484,24 @@ export default {
             mask: true,
           });
 
+          // 获取微信 ID
+          const wechatId = uni.getStorageSync("wechatId") || "";
+
+          // 获取地理位置
+          const location = await new Promise((resolve, reject) => {
+            uni.getLocation({
+              type: "wgs84",
+              success: (res) => {
+                resolve({ lat: res.latitude, lng: res.longitude });
+              },
+              fail: (err) => {
+                console.error("获取地理位置失败", err);
+                // 如果获取地理位置失败，使用默认值
+                resolve({ lat: 31.49592, lng: 120.3111 });
+              },
+            });
+          });
+
           // 调用激活API
           const response = await new Promise((resolve, reject) => {
             uni.request({
@@ -439,9 +511,9 @@ export default {
                 "Content-Type": "application/json",
               },
               data: {
-                wechatId: "wx123456",
-                lat: 31.49592,
-                lng: 120.3111,
+                wechatId: wechatId || "wx123456",
+                lat: location.lat,
+                lng: location.lng,
                 activationCode: this.activationCode,
                 deviceId: this.bluetoothManager.deviceId,
                 bluetoothName: this.bluetoothManager.scanName,
