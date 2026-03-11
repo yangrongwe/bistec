@@ -199,6 +199,7 @@ export default {
       blueList: [],
       bluetoothManager: bluetoothManager,
       hasValidData: false, // 是否收到有效监听值
+      hasDeviceDataError: false, // 是否已经显示设备数据错误
     };
   },
   watch: {
@@ -235,6 +236,9 @@ export default {
     async searchBluetoothDevices() {
       // 清空蓝牙列表
       this.blueList = [];
+      // 重置错误标志
+      this.hasDeviceDataError = false;
+      this.hasValidData = false;
 
       try {
         // 初始化蓝牙模块
@@ -282,10 +286,14 @@ export default {
           text: "蓝牙设备连接成功，正在验证设备...",
         };
 
+        // 重置设备数据错误标志
+        this.hasDeviceDataError = false;
+
         // 设置设备验证超时
         const validationTimeout = setTimeout(() => {
           // 如果超时还没有收到有效数据，显示错误信息
           if (this.bluetoothManager.getConnectedStatus()) {
+            this.hasDeviceDataError = true;
             this.message = {
               type: "error",
               text: "未检测到有效设备数据，请检查设备是否正确",
@@ -302,11 +310,14 @@ export default {
             this.listenValueChange(validationTimeout);
           } catch (err) {
             console.error("获取服务或特征值失败", err);
-            clearTimeout(validationTimeout);
-            this.message = {
-              type: "error",
-              text: "蓝牙设备初始化失败",
-            };
+            // 如果已经显示了设备数据错误，不再显示其他错误
+            if (!this.hasDeviceDataError) {
+              clearTimeout(validationTimeout);
+              this.message = {
+                type: "error",
+                text: "蓝牙设备初始化失败",
+              };
+            }
           }
         }, 500);
       } catch (err) {
@@ -330,10 +341,13 @@ export default {
           this.bluetoothManager.validateBluetoothDevice(data);
         if (!isDeviceValid) {
           // 设备验证失败，显示错误信息
-          this.message = {
-            type: "error",
-            text: "连接的蓝牙设备不正确",
-          };
+          // 如果已经显示了设备数据错误，不再显示其他错误
+          if (!this.hasDeviceDataError) {
+            this.message = {
+              type: "error",
+              text: "连接的蓝牙设备不正确",
+            };
+          }
           this.hasValidData = false;
           return;
         }
