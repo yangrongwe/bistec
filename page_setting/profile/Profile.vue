@@ -15,44 +15,53 @@
 
       <view class="title">已绑定产品</view>
       <view class="list">
-        <view class="item" v-for="(p, i) in products" :key="p.id">
-          <view class="info">
-            <view class="row">
-              <text class="label">产品序列号</text>
-              <text class="value">{{ p.sn }}</text>
+        <!-- 加载状态 -->
+        <view v-if="loading" class="empty">加载中...</view>
+
+        <!-- 错误提示 -->
+        <view v-else-if="error" class="empty error">{{ error }}</view>
+
+        <!-- 产品列表 -->
+        <view v-else>
+          <view class="item" v-for="(p, i) in products" :key="p.id">
+            <view class="info">
+              <view class="row">
+                <text class="label">产品序列号</text>
+                <text class="value">{{ p.sn }}</text>
+              </view>
+              <view class="divider"></view>
+              <view class="row">
+                <text class="label">激活码</text>
+                <text class="value">{{ p.code }}</text>
+              </view>
+              <view class="divider"></view>
+              <view class="row">
+                <text class="label">激活时间</text>
+                <text class="value">{{ p.time }}</text>
+              </view>
+              <view class="divider"></view>
+              <view class="row">
+                <text class="label">蓝牙名称</text>
+                <text class="value">{{ p.bluetoothName || "未知" }}</text>
+              </view>
+              <view class="divider"></view>
+              <view class="row">
+                <text class="label">DeviceId</text>
+                <text class="value">{{ p.deviceId || "未知" }}</text>
+              </view>
             </view>
-            <view class="divider"></view>
-            <view class="row">
-              <text class="label">激活码</text>
-              <text class="value">{{ p.code }}</text>
-            </view>
-            <view class="divider"></view>
-            <view class="row">
-              <text class="label">激活时间</text>
-              <text class="value">{{ p.time }}</text>
-            </view>
-            <view class="divider"></view>
-            <view class="row">
-              <text class="label">蓝牙名称</text>
-              <text class="value">{{ p.bluetoothName || "未知" }}</text>
-            </view>
-            <view class="divider"></view>
-            <view class="row">
-              <text class="label">DeviceId</text>
-              <text class="value">{{ p.deviceId || "未知" }}</text>
+            <view class="actions">
+              <button
+                v-if="p.sn === connectedDeviceName"
+                class="unbind"
+                @tap="unbind(i)"
+              >
+                去激活
+              </button>
             </view>
           </view>
-          <view class="actions">
-            <button
-              v-if="p.sn === connectedDeviceName"
-              class="unbind"
-              @tap="unbind(i)"
-            >
-              去激活
-            </button>
-          </view>
+          <view v-if="!products.length" class="empty">暂无绑定产品</view>
         </view>
-        <view v-if="!products.length" class="empty">暂无绑定产品</view>
       </view>
     </view>
   </view>
@@ -75,24 +84,9 @@ export default {
       backTop: 0,
       titleTop: 0,
       connectedDeviceName: "",
-      products: [
-        {
-          id: "1",
-          sn: "SN-20260101-0001",
-          code: "ABCD-1234",
-          time: "2026-03-06 10:20:30",
-          bluetoothName: "BIS-001",
-          deviceId: "12:34:56:78:90:AB",
-        },
-        {
-          id: "2",
-          sn: "SN-20260101-0002",
-          code: "EFGH-5678",
-          time: "2026-03-06 10:22:10",
-          bluetoothName: "BIS-002",
-          deviceId: "CD:EF:12:34:56:78",
-        },
-      ],
+      products: [],
+      loading: true,
+      error: "",
     };
   },
   methods: {
@@ -103,6 +97,44 @@ export default {
         uni.switchTab({
           url: "/pages/index/index",
         });
+      }
+    },
+    // 获取产品数据
+    async getProducts() {
+      try {
+        this.loading = true;
+        this.error = "";
+
+        // 获取微信 ID
+        const wechatId = uni.getStorageSync("wechatId") || "wx123456";
+
+        // 调用 API 获取产品数据
+        const response = await new Promise((resolve, reject) => {
+          uni.request({
+            url: `http://localhost:8290/api/bound-products?wechatId=${wechatId}`,
+            method: "GET",
+            success: (res) => {
+              resolve(res);
+            },
+            fail: (err) => {
+              reject(err);
+            },
+          });
+        });
+
+        if (response.statusCode === 200 && response.data) {
+          // 假设 API 返回的数据格式为 { data: [...] }
+          this.products = response.data.data || [];
+        } else {
+          this.error = "获取产品数据失败";
+          this.products = [];
+        }
+      } catch (err) {
+        console.error("获取产品数据失败", err);
+        this.error = "网络连接异常";
+        this.products = [];
+      } finally {
+        this.loading = false;
       }
     },
     async unbind(index) {
@@ -158,6 +190,9 @@ export default {
         this.titleTop = this.statusBarHeight + (this.navigatorHeight - 24) / 2;
         // 获取当前连接的蓝牙设备名称
         this.connectedDeviceName = bluetoothManager.getConnectedDeviceName();
+
+        // 获取产品数据
+        this.getProducts();
       },
     });
   },
@@ -271,6 +306,10 @@ export default {
       color: #9fb3c8;
       margin-top: 60rpx;
       font-size: 26rpx;
+    }
+
+    .empty.error {
+      color: #ff6b6b;
     }
   }
 }
