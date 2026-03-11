@@ -133,14 +133,16 @@
           <!-- 激活按钮 -->
           <button
             @tap="handleActivate"
-            :disabled="!bluetoothManager.getConnectedStatus()"
+            :disabled="!bluetoothManager.getConnectedStatus() || !hasValidData"
             :class="[
               'btn-activate',
-              bluetoothManager.getConnectedStatus() ? 'enabled' : 'disabled',
+              bluetoothManager.getConnectedStatus() && hasValidData
+                ? 'enabled'
+                : 'disabled',
             ]"
           >
             <view
-              v-if="bluetoothManager.getConnectedStatus()"
+              v-if="bluetoothManager.getConnectedStatus() && hasValidData"
               class="shimmer-effect"
             ></view>
             <text class="btn-text">激活设备</text>
@@ -196,6 +198,7 @@ export default {
       blueModalShow: false,
       blueList: [],
       bluetoothManager: bluetoothManager,
+      hasValidData: false, // 是否收到有效监听值
     };
   },
   watch: {
@@ -331,8 +334,12 @@ export default {
             type: "error",
             text: "连接的蓝牙设备不正确",
           };
+          this.hasValidData = false;
           return;
         }
+
+        // 收到有效数据
+        this.hasValidData = true;
 
         // 解析激活状态
         const activationStatus =
