@@ -1,0 +1,20 @@
+{
+  "name": "bis-cn",
+  "version": "1.0.0",
+  "description": "BIS CN Mini Program",
+  "main": "main.js",
+  "scripts": {
+    "dev:mp-weixin": "uni-app dev mp-weixin",
+    "build:mp-weixin": "uni-app build mp-weixin"
+  },
+  "dependencies": {
+    "vue": "^2.6.14",
+    "vuex": "^3.6.2"
+  },
+  "devDependencies": {
+    "@dcloudio/uni-automator": "^2.0.0",
+    "@dcloudio/uni-cli-shared": "^2.0.0",
+    "@dcloudio/uni-mp-weixin": "^2.0.0",
+    "@dcloudio/uni-template-compiler": "^2.0.0"
+  }
+}

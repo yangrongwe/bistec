@@ -33,7 +33,7 @@
             </view>
           </view>
           <view class="actions">
-            <button class="unbind" @tap="unbind(i)">去激活</button>
+            <button v-if="p.sn === connectedDeviceName" class="unbind" @tap="unbind(i)">去激活</button>
           </view>
         </view>
         <view v-if="!products.length" class="empty">暂无绑定产品</view>
@@ -43,6 +43,7 @@
 </template>
 
 <script>
+import bluetoothManager from "../../util/bluetoothManager.js";
 export default {
   name: "Profile",
   data() {
@@ -57,6 +58,7 @@ export default {
       urls: [],
       backTop: 0,
       titleTop: 0,
+      connectedDeviceName: "",
       products: [
         {
           id: "1",
@@ -83,18 +85,38 @@ export default {
         });
       }
     },
-    unbind(index) {
+    async unbind(index) {
       const item = this.products[index];
       uni.showModal({
-        title: "确认解绑",
-        content: `确定解绑序列号为 ${item.sn} 的产品吗？`,
-        success: (res) => {
+        title: "确认去激活",
+        content: `确定去激活序列号为 ${item.sn} 的产品吗？`,
+        success: async (res) => {
           if (res.confirm) {
-            this.products.splice(index, 1);
-            uni.showToast({
-              title: "已解绑",
-              icon: "none",
-            });
+            try {
+              // 断开蓝牙连接
+              await bluetoothManager.disconnect();
+              // 重置蓝牙状态
+              bluetoothManager.reset();
+              // 从列表中移除
+              this.products.splice(index, 1);
+              uni.showToast({
+                title: "已去激活",
+                icon: "none",
+              });
+              // 返回激活画面
+              setTimeout(() => {
+                uni.navigateTo({
+                  url: "/pages/ble/index",
+                });
+              }, 1000);
+            } catch (err) {
+              console.error("去激活失败", err);
+              uni.showToast({
+                title: "去激活失败",
+                icon: "error",
+                duration: 2000,
+              });
+            }
           }
         },
       });
@@ -109,11 +131,12 @@ export default {
         this.statusBarHeight = res.statusBarHeight;
         this.menuHeight = menu.height;
         this.menuTop = menu.top;
-        this.navigatorHeight =
-          (menu.top - res.statusBarHeight) * 2 + menu.height;
+        this.navigatorHeight = (menu.top - res.statusBarHeight) * 2 + menu.height;
         this.totalHeight = this.statusBarHeight + this.navigatorHeight;
         this.backTop = this.statusBarHeight + this.navigatorHeight / 2 - 13;
         this.titleTop = this.statusBarHeight + (this.navigatorHeight - 24) / 2;
+        // 获取当前连接的蓝牙设备名称
+        this.connectedDeviceName = bluetoothManager.getConnectedDeviceName();
       },
     });
   },

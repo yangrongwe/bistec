@@ -18,12 +18,12 @@
       ></uni-icons>
     </view>
     <view class="main">
-      <blueModal
+      <blue-modal
         :show="blueModalShow"
         :blueList="blueList"
         @unConnect="unConnect"
         @connect="blueConnect"
-      ></blueModal>
+      ></blue-modal>
       <modal
         :show="modalShow"
         @showChange="showChange"
@@ -86,8 +86,8 @@
 
 <script>
 import BluetoothSignal from "../bluetoothSignal/BluetoothSignal.vue";
-import Modal from "@/components/modal/Modal.vue";
-import BlueModal from "@/components/modal/BlueModal.vue";
+import Modal from "../modal/Modal.vue";
+import BlueModal from "../modal/BlueModal.vue";
 import store from "../../store";
 import bluetoothManager from "../../util/bluetoothManager.js";
 export default {
@@ -101,8 +101,6 @@ export default {
       scanFlag: false,
 
       isShow: this.$store.state.isShow,
-      connectedStatus: false,
-      scanName: uni.getStorageSync("scanName") || "",
       currentMode: uni.getStorageSync("currentMode")
         ? parseInt(uni.getStorageSync("currentMode"))
         : 0,
@@ -117,9 +115,6 @@ export default {
       menuTop: 0, //胶囊与顶部的距离
       totalHeight: 0, //总高度
       blueDeviceList: [],
-      deviceId: uni.getStorageSync("deviceId") || "",
-      uuidServices: "",
-      characteristicId: "",
       G: {
         GX: 0,
         GY: 0,
@@ -137,6 +132,7 @@ export default {
       workCondition: "cardrive",
       workConditionCode: 0,
       bluetoothCount: 0,
+      bluetoothManager: bluetoothManager,
       urls: [
         //预加载图片地址
         "https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/backImage/comfortBack.png",
@@ -213,29 +209,6 @@ export default {
     blueModal: BlueModal,
   },
   methods: {
-    // 判断是否为鸿蒙系统
-    async isHarmonyOS() {
-      return new Promise((resolve) => {
-        // #ifdef MP-HARMONY
-        resolve(true);
-        return;
-        // #endif
-
-        // #ifndef MP-HARMONY
-        uni.getSystemInfo({
-          success: (res) => {
-            const isHarmony =
-              res.system.includes("Harmony") ||
-              res.platform === "harmony" ||
-              (res.brand === "huawei" && res.system.includes("6.0"));
-            resolve(isHarmony);
-          },
-          fail: () => resolve(false),
-        });
-        // #endif
-      });
-    },
-
     unConnect() {
       this.blueModalShow = false;
     },
@@ -266,18 +239,16 @@ export default {
             console.log("设备ID:", device.deviceId);
             console.log("设备名称:", device.name);
             try {
-              await bluetoothManager.disconnect();
+              await this.bluetoothManager.disconnect();
               console.log("蓝牙连接已断开1");
-              this.connectedStatus = false;
             } catch (err) {
               console.error("断开蓝牙连接失败", err);
             }
           }
         } else {
           try {
-            await bluetoothManager.disconnect();
+            await this.bluetoothManager.disconnect();
             console.log("蓝牙连接已断开1---");
-            this.connectedStatus = false;
           } catch (err) {
             console.error("断开蓝牙连接失败-----", err);
           }
@@ -306,14 +277,11 @@ export default {
       this.blueListFlag = false;
       if (uni.getStorageSync("deviceId")) {
         try {
-          await bluetoothManager.disconnect();
+          await this.bluetoothManager.disconnect();
           console.log("蓝牙连接已断开1");
           if (uni.getStorageSync("deviceId")) {
-            bluetoothManager.reset();
-            this.deviceId = "";
-            this.scanName = "";
+            this.bluetoothManager.reset();
           }
-          this.connectedStatus = false;
         } catch (err) {
           console.error("断开蓝牙连接失败", err);
         }
@@ -334,7 +302,7 @@ export default {
 
       try {
         // 初始化蓝牙模块
-        await bluetoothManager.initBlue();
+        await this.bluetoothManager.initBlue();
         console.log("初始化蓝牙成功");
 
         // 初次加载或者点击蓝牙图标
@@ -344,9 +312,8 @@ export default {
             this.scanFlag = true;
             uni.scanCode({
               success: async (res) => {
-                this.scanName = res.result;
                 // 寻找对应名字的蓝牙设备
-                await this.discovery();
+                await this.discovery(res.result);
               },
             });
           } else {
@@ -354,8 +321,7 @@ export default {
               "uni.getStorageSync scanName",
               uni.getStorageSync("scanName"),
             );
-            this.scanName = uni.getStorageSync("scanName");
-            await this.discovery();
+            await this.discovery(uni.getStorageSync("scanName"));
           }
         } else {
           // 不指定名字
@@ -376,15 +342,15 @@ export default {
       }
     },
     // 【2】开始搜寻附近设备
-    async discovery() {
+    async discovery(scanName = "") {
       try {
         // 开始搜索蓝牙设备
-        await bluetoothManager.startDiscovery();
+        await this.bluetoothManager.startDiscovery();
         console.log("开始搜索");
 
         // 开启监听回调
-        bluetoothManager.onBluetoothDeviceFound((res) => {
-          this.found(res);
+        this.bluetoothManager.onBluetoothDeviceFound((res) => {
+          this.found(res, scanName);
         });
       } catch (err) {
         console.log("搜索失败");
@@ -392,7 +358,7 @@ export default {
       }
     },
     // 【3】找到新设备就触发该方法
-    found(res) {
+    found(res, scanName = "") {
       // if (res.devices[0].name == 'BIS') {
       // 	this.blueDeviceList.push(res.devices[0]);
       // 	this.connect(res.devices[0]);
@@ -401,7 +367,7 @@ export default {
       // 找到扫描二维码对应的蓝牙
       // console.log("搜索后追加链接");
       if (!this.blueListFlag) {
-        if (res.devices[0].name == this.scanName) {
+        if (res.devices[0].name == scanName) {
           this.blueDeviceList.push(res.devices[0]);
           this.connect(res.devices[0]);
         }
@@ -424,22 +390,20 @@ export default {
       try {
         this.blueModalShow = false;
         console.log(data);
-        this.deviceId = data.deviceId;
 
         // 连接蓝牙设备
-        await bluetoothManager.connect(data);
+        await this.bluetoothManager.connect(data);
         console.log("连接成功");
 
         this.blueListFlag = false;
-        this.connectedStatus = true;
 
         // 停止搜索
-        await bluetoothManager.stopDiscovery();
+        await this.bluetoothManager.stopDiscovery();
 
         // 获取服务和特征值
-        await bluetoothManager.getServices();
-        await bluetoothManager.getCharacteristics();
-        await bluetoothManager.notify();
+        await this.bluetoothManager.getServices();
+        await this.bluetoothManager.getCharacteristics();
+        await this.bluetoothManager.notify();
         this.listenValueChange();
 
         uni.onBLEConnectionStateChange((res) => {
@@ -473,15 +437,16 @@ export default {
     async reconnect() {
       try {
         // 连接蓝牙设备
-        await bluetoothManager.connect({
+        await this.bluetoothManager.connect({
           deviceId: uni.getStorageSync("deviceId"),
+          name: uni.getStorageSync("scanName"),
         });
         console.log("连接成功");
 
         // 获取服务和特征值
-        await bluetoothManager.getServices();
-        await bluetoothManager.getCharacteristics();
-        await bluetoothManager.notify();
+        await this.bluetoothManager.getServices();
+        await this.bluetoothManager.getCharacteristics();
+        await this.bluetoothManager.notify();
         this.listenValueChange();
       } catch (err) {
         console.log("重新连接失败");
@@ -498,124 +463,6 @@ export default {
         fail(err) {
           console.log("停止失败");
           console.error(err);
-        },
-      });
-    },
-    // 【6】获取服务（兼容版）
-    async getServices() {
-      const that = this;
-      const isHarmony = await this.isHarmonyOS();
-
-      uni.getBLEDeviceServices({
-        deviceId: uni.getStorageSync("deviceId"),
-        success(res) {
-          console.log("获取服务成功", res.services);
-
-          if (isHarmony && res.services.length > 1) {
-            // 鸿蒙：尝试找 FFB0 服务
-            let targetService = null;
-            for (let i = 0; i < res.services.length; i++) {
-              if (res.services[i].uuid.includes("FFB0")) {
-                targetService = res.services[i];
-                break;
-              }
-            }
-            that.uuidServices = targetService
-              ? targetService.uuid
-              : res.services[0].uuid;
-          } else {
-            // iOS/Android：直接用第一个
-            that.uuidServices = res.services[0].uuid;
-          }
-
-          uni.setStorageSync("uuidServices", that.uuidServices);
-          that.getCharacteristics();
-        },
-        fail(err) {
-          console.error("获取服务失败", err);
-        },
-      });
-    },
-    // 【7】获取特征值（兼容版）
-    async getCharacteristics() {
-      const that = this;
-      const isHarmony = await this.isHarmonyOS();
-
-      uni.getBLEDeviceCharacteristics({
-        deviceId: uni.getStorageSync("deviceId"),
-        serviceId: uni.getStorageSync("uuidServices"),
-        success(res) {
-          console.log("获取特征值成功", res);
-
-          if (isHarmony) {
-            // 鸿蒙特殊处理：固定使用索引，忽略属性
-            uni.setStorageSync(
-              "writeCharacteristicId",
-              res.characteristics[0].uuid,
-            );
-            that.characteristicId =
-              res.characteristics[1]?.uuid || res.characteristics[0].uuid;
-            uni.setStorageSync("characteristicId", that.characteristicId);
-          } else {
-            // iOS/Android 正常处理：基于属性选择
-            let writeCharId = "";
-            let notifyCharId = "";
-
-            res.characteristics.forEach((char) => {
-              if (char.properties.write || char.properties.writeNoResponse) {
-                writeCharId = char.uuid;
-              }
-              if (char.properties.notify || char.properties.indicate) {
-                notifyCharId = char.uuid;
-              }
-            });
-
-            uni.setStorageSync(
-              "writeCharacteristicId",
-              writeCharId || res.characteristics[0].uuid,
-            );
-            that.characteristicId =
-              notifyCharId ||
-              res.characteristics[1]?.uuid ||
-              res.characteristics[0].uuid;
-            uni.setStorageSync("characteristicId", that.characteristicId);
-          }
-
-          setTimeout(() => {
-            that.notify();
-          }, 1000);
-        },
-        fail(err) {
-          console.error("获取特征值失败", err.errMsg);
-        },
-      });
-    },
-    // 【8】开启消息监听（兼容版）
-    async notify() {
-      const that = this;
-      const isHarmony = await this.isHarmonyOS();
-
-      console.log("服务UUID:", this.uuidServices);
-      console.log("监听特征值:", this.characteristicId);
-
-      uni.notifyBLECharacteristicValueChange({
-        state: true,
-        deviceId: this.deviceId,
-        serviceId: this.uuidServices,
-        characteristicId: this.characteristicId,
-        success(res) {
-          console.log("开启消息监听成功", res);
-          that.listenValueChange();
-        },
-        fail(err) {
-          console.error("开启消息失败", err);
-          if (isHarmony) {
-            // 鸿蒙：自动重试
-            console.log("鸿蒙模式：5秒后重试...");
-            setTimeout(() => {
-              that.notify();
-            }, 5000);
-          }
         },
       });
     },
@@ -645,11 +492,29 @@ export default {
       const that = this;
       console.log("onBLECharacteristicValueChange已经开启监听");
 
-      bluetoothManager.listenValueChange((data) => {
+      this.bluetoothManager.listenValueChange((data) => {
         console.log("监听的值", data);
 
+        // 验证蓝牙设备是否正确
+        const isDeviceValid =
+          that.bluetoothManager.validateBluetoothDevice(data);
+        if (!isDeviceValid) {
+          // 设备验证失败，返回激活画面
+          uni.showToast({
+            title: "连接的蓝牙设备不正确",
+            icon: "error",
+            duration: 2000,
+          });
+          setTimeout(() => {
+            uni.navigateTo({
+              url: "/pages/ble/index",
+            });
+          }, 2000);
+          return;
+        }
+
         // 解析蓝牙数据
-        const parsedData = bluetoothManager.parseBluetoothData(data);
+        const parsedData = that.bluetoothManager.parseBluetoothData(data);
 
         // 阻尼设定
         that.DC = parsedData.DC;
@@ -672,7 +537,8 @@ export default {
         that.G = parsedData.G;
 
         // 其他参数
-        const { frontSuspension, heel, behindSuspension, DCValue } = parsedData;
+        const { frontSuspension, rearSuspension, rollStrength, drawStrength } =
+          parsedData;
 
         uni.setStorageSync(
           "setting",
@@ -680,15 +546,16 @@ export default {
             GX: parsedData.G.GX + 100,
             GY: parsedData.G.GY + 100,
             frontSuspension,
-            heel,
-            behindSuspension,
-            DC: DCValue,
+            rearSuspension,
+            rollStrength,
+            drawStrength,
+            DC: parsedData.DC,
           }),
         );
 
         if (that.bluetoothCount % 100 == 0) {
           // 每隔1s监测蓝牙信号强度
-          bluetoothManager
+          that.bluetoothManager
             .getRSSI()
             .then((rssi) => {
               console.log("蓝牙强度", rssi);

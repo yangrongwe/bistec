@@ -18,8 +18,8 @@
 				@click="statusChange(index)"
 			>
 				<view class="img-box">
-					<image :src="item.activePath" alt="" v-if="item.status">
-					<image :src="item.path" alt="" v-else>
+					<image :src="item.activePath" alt="" v-if="item.status"></image>
+					<image :src="item.path" alt="" v-else></image>
 				</view>
 				<view class="name-box" :class="{'acitve-name':item.status}">{{item.name}}</view>
 			</view>
@@ -345,33 +345,33 @@ import {sendData} from "../../util/sendInfo.js"
 				})
 			},
 			//获取初始状态
-			init() {
-				const that = this;
-				this.deviceId = uni.getStorageSync("deviceId");
-				this.uuidServices = uni.getStorageSync("uuidServices");
-				this.characteristicId = uni.getStorageSync("writeCharacteristicId");
-				if(uni.getStorageSync("setting")){
-					const setting = JSON.parse(uni.getStorageSync("setting"));
-					this.gaugeList[0].progress = setting.frontSuspension;
-					this.gaugeList[1].progress = setting.heel;
-					this.gaugeList[2].progress = setting.behindSuspension;
-					this.drawProgress = setting.DC;
-					// this.sceneList.forEach(value => {
-					// 	if(value.name==setting.fastChange){
-					// 		value.status=true;
-					// 	}else{
-					// 		value.status=false;
-					// 	}
-					// })
-				}
-			},
-			//二进制字符串补位
-			addInt2(str){
-				for(let i=str.length;i<4;i++){
-					str = "0"+str;
-				}
-				return str;
+		init() {
+			const that = this;
+			this.deviceId = uni.getStorageSync("deviceId");
+			this.uuidServices = uni.getStorageSync("uuidServices");
+			this.characteristicId = uni.getStorageSync("writeCharacteristicId");
+			if(uni.getStorageSync("setting")){
+				const setting = JSON.parse(uni.getStorageSync("setting"));
+				this.gaugeList[0].progress = setting.frontSuspension;
+				this.gaugeList[1].progress = setting.heel;
+				this.gaugeList[2].progress = setting.behindSuspension;
+				this.drawProgress = setting.DC;
+				// this.sceneList.forEach(value => {
+				// 	if(value.name==setting.fastChange){
+				// 		value.status=true;
+				// 	}else{
+				// 		value.status=false;
+				// 	}
+				// })
 			}
+		},
+			//二进制字符串补位
+		addInt2(str){
+			for(let i=str.length;i<4;i++){
+				str = "0"+str;
+			}
+			return str;
+		}
 		}
 	}
 	function HexStringToBuffer(hexString) {

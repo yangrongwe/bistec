@@ -250,37 +250,47 @@ class BluetoothManager {
     uni.onBLECharacteristicValueChange((res) => {
       console.log('监听的值', res.value);
       
-      var data = new Uint8Array(res.value);
-      var dataView = new DataView(data.buffer);
+      var uint8Data = new Uint8Array(res.value);
+      var dataView = new DataView(uint8Data.buffer);
 
-      // 数据帧头帧尾校验
-      const begin = dataView.getUint32(0, true);
-      const end = dataView.getUint32(16, true);
-      let regStatus = false;
-
-      if (begin == 4278124543 && end == 4294967038) {
-        regStatus = true;
+      // 检查数据长度是否足够
+      if (dataView.byteLength < 24) {
+        console.info('数据长度不足');
+        return;
       }
 
-      if (dataView && regStatus) {
-        const firstCode = dataView.getUint32(4, true);
-        const secondCode = dataView.getUint32(8, true);
-        const thirdCode = dataView.getUint32(12, true);
-        
-        const data = {
-          firstCode,
-          secondCode,
-          thirdCode,
-          begin,
-          end,
-          rawData: res.value
-        };
-        
-        callback(data);
-      } else {
-        console.info('数据格式异常');
-      }
+      // 解析6个32位输出值
+      const output1 = dataView.getUint32(0, true);  // 输出1
+      const output2 = dataView.getUint32(4, true);  // 输出2
+      const output3 = dataView.getUint32(8, true);  // 输出3
+      const output4 = dataView.getUint32(12, true); // 输出4
+      const output5 = dataView.getUint32(16, true); // 输出5
+      const output6 = dataView.getUint32(20, true); // 输出6
+      
+      const parsedData = {
+        output1,
+        output2,
+        output3,
+        output4,
+        output5,
+        output6,
+        rawData: res.value
+      };
+      
+      callback(parsedData);
     });
+  }
+
+  // 验证蓝牙设备是否正确
+  validateBluetoothDevice(data) {
+    // 这里需要根据广播值的格式进行验证
+    // 暂时返回true，后续根据实际广播值格式修改
+    return true;
+  }
+
+  // 获取当前连接的蓝牙设备名称
+  getConnectedDeviceName() {
+    return this.scanName;
   }
 
   // 发送数据
@@ -350,53 +360,81 @@ class BluetoothManager {
 
   // 解析蓝牙数据
   parseBluetoothData(data) {
-    const { firstCode, secondCode, thirdCode } = data;
+    const { output1, output2, output3, output4, output5, output6 } = data;
     
-    // 阻尼设定
-    const DC = {
-      FLCompress: (thirdCode >> 28) & 0x0f,
-      FLDraw: (thirdCode >> 24) & 0x0f,
-      FRCompress: (thirdCode >> 20) & 0x0f,
-      FRDraw: (thirdCode >> 16) & 0x0f,
-      RLCompress: (thirdCode >> 12) & 0x0f,
-      RLDraw: (thirdCode >> 8) & 0x0f,
-      RRCompress: (thirdCode >> 4) & 0x0f,
-      RRDraw: (thirdCode >> 0) & 0x0f,
-    };
+    // 输出1解析
+    const drawStrength = (output1 >> 28) & 0x0f;       // 拉压强度 (1-9)
+    const rearSuspension = (output1 >> 24) & 0x0f;    // 后悬架强度 (1-9)
+    const rollStrength = (output1 >> 20) & 0x0f;       // 侧倾强度 (1-9)
+    const frontSuspension = (output1 >> 16) & 0x0f;    // 前悬架强度 (1-9)
+    const activationFlag = (output1 >> 6) & 0x07;      // 激活标志位 (0-7)
+    const workConditionInt = (output1 >> 3) & 0x07;    // 工况标识 (0-4)
+    const mode = (output1 >> 1) & 0x03;               // 当前模式反馈 (0-3)
 
     // 工况
-    let workConditionInt = (firstCode >> 2) & 0x07;
     let workCondition = '';
     switch (workConditionInt) {
       case 0:
-        workCondition = 'carbrake';
+        workCondition = 'bump';      // 颠簸
         break;
       case 1:
-        workCondition = 'turnleft';
+        workCondition = 'turnright';  // 右转
         break;
       case 2:
-        workCondition = 'carstop';
+        workCondition = 'carstop';    // 停车
         break;
       case 3:
-        workCondition = 'turnright';
+        workCondition = 'turnleft';   // 左转
         break;
       case 4:
-        workCondition = 'cardrive';
+        workCondition = 'highspeed';  // 高速
+        break;
+      default:
+        workCondition = 'unknown';
     }
 
-    // 模式反馈
-    const mode = (firstCode >> 0) & 0x03;
+    // 输出2解析 - G值
+    const gxRaw = (output2 >> 16) & 0xffff;  // X轴加速度原始值 (0-1000)
+    const gyRaw = output2 & 0xffff;          // Y轴加速度原始值 (0-1000)
+    const G = {
+      GX: (gxRaw - 500) / 1000,  // 实际G值
+      GY: (gyRaw - 500) / 1000   // 实际G值
+    };
 
-    // GX GY
-    const GX = (secondCode >> 8) & 0xff;
-    const GY = (secondCode >> 0) & 0xff;
-    const G = { GX: GX - 100, GY: GY - 100 };
+    // 输出3解析 - 前悬架阻尼
+    const FLCompress = (output3 >> 24) & 0xff;  // 左前压缩阻尼 (0-100)
+    const FLDraw = (output3 >> 16) & 0xff;      // 左前复原阻尼 (0-100)
+    const FRCompress = (output3 >> 8) & 0xff;    // 右前压缩阻尼 (0-100)
+    const FRDraw = output3 & 0xff;              // 右前复原阻尼 (0-100)
 
-    // 其他参数
-    const frontSuspension = (secondCode >> 16) & 0x0f;
-    const heel = (secondCode >> 20) & 0x0f;
-    const behindSuspension = (secondCode >> 24) & 0x0f;
-    const DCValue = (secondCode >> 28) & 0x0f;
+    // 输出4解析 - 后悬架阻尼
+    const RLCompress = (output4 >> 24) & 0xff;  // 左后压缩阻尼 (0-100)
+    const RLDraw = (output4 >> 16) & 0xff;      // 左后拉伸阻尼 (0-100)
+    const RRCompress = (output4 >> 8) & 0xff;    // 右后压缩阻尼 (0-100)
+    const RRDraw = output4 & 0xff;              // 右后拉伸阻尼 (0-100)
+
+    // 阻尼设定
+    const DC = {
+      FLCompress,
+      FLDraw,
+      FRCompress,
+      FRDraw,
+      RLCompress,
+      RLDraw,
+      RRCompress,
+      RRDraw
+    };
+
+    // 输出5解析 - 垂向加速度
+    const springAccRaw = (output5 >> 16) & 0xffff;  // 簧下垂向加速度原始值 (0-1000)
+    const bodyAccRaw = output5 & 0xffff;            // 车身垂向加速度原始值 (0-1000)
+    const verticalAcc = {
+      spring: (springAccRaw - 500) / 1000,  // 簧下垂向加速度实际G值
+      body: (bodyAccRaw - 500) / 1000       // 车身垂向加速度实际G值
+    };
+
+    // 输出6解析 - 车速
+    const speed = output6 & 0xffff;  // 车速 (0-200 km/h)
 
     return {
       DC,
@@ -404,18 +442,21 @@ class BluetoothManager {
       workConditionCode: workConditionInt,
       mode,
       G,
+      verticalAcc,
+      speed,
+      drawStrength,
       frontSuspension,
-      heel,
-      behindSuspension,
-      DCValue
+      rearSuspension,
+      rollStrength,
+      activationFlag
     };
   }
 
   // 解析激活状态
   parseActivationStatus(data) {
-    const { firstCode } = data;
-    // 判断5-7位是否为1（从0开始计数，第5-7位对应二进制位2-4）
-    let activationStatus = (firstCode >> 2) & 0x07;
+    const { output1 } = data;
+    // 激活标志位：位8~6（对应output1的bit6-8）
+    let activationStatus = (output1 >> 6) & 0x07;
     console.log('激活状态:', activationStatus);
     return activationStatus;
   }
@@ -438,6 +479,45 @@ class BluetoothManager {
     uni.removeStorageSync('uuidServices');
     uni.removeStorageSync('writeCharacteristicId');
     uni.removeStorageSync('characteristicId');
+  }
+
+  // 获取蓝牙连接状态
+  getConnectedStatus() {
+    return this.connectedStatus;
+  }
+
+  // 获取当前连接的设备信息
+  getConnectedDevice() {
+    return {
+      deviceId: this.deviceId,
+      name: this.scanName
+    };
+  }
+
+  // 检查蓝牙连接状态
+  async checkConnectionStatus() {
+    if (!this.deviceId) {
+      this.connectedStatus = false;
+      return false;
+    }
+    
+    return new Promise((resolve) => {
+      uni.getBLEDeviceState({
+        success: (res) => {
+          if (res.available && res.connected) {
+            this.connectedStatus = true;
+            resolve(true);
+          } else {
+            this.connectedStatus = false;
+            resolve(false);
+          }
+        },
+        fail: () => {
+          this.connectedStatus = false;
+          resolve(false);
+        }
+      });
+    });
   }
 }
 

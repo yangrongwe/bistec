@@ -10,18 +10,18 @@
       <!-- 蓝牙连接卡片 -->
       <view class="bluetooth-card">
         <!-- 发光效果 -->
-        <view v-if="isBluetoothConnected" class="glow-effect"></view>
+        <view v-if="bluetoothManager.getConnectedStatus()" class="glow-effect"></view>
 
         <view class="card-content">
           <view class="bluetooth-info">
             <view
               :class="[
                 'bluetooth-icon',
-                isBluetoothConnected ? 'connected' : '',
+                bluetoothManager.getConnectedStatus() ? 'connected' : '',
               ]"
             >
               <text class="icon">📡</text>
-              <view v-if="isBluetoothConnected" class="ping-effect"></view>
+              <view v-if="bluetoothManager.getConnectedStatus()" class="ping-effect"></view>
             </view>
             <view class="bluetooth-text">
               <text class="device-name">蓝牙设备</text>
@@ -29,16 +29,16 @@
                 <view
                   :class="[
                     'status-dot',
-                    isBluetoothConnected ? 'connected' : '',
+                    bluetoothManager.getConnectedStatus() ? 'connected' : '',
                   ]"
                 ></view>
                 <text
                   :class="[
                     'status-text',
-                    isBluetoothConnected ? 'connected' : '',
+                    bluetoothManager.getConnectedStatus() ? 'connected' : '',
                   ]"
                 >
-                  {{ isBluetoothConnected ? "已连接" : "未连接" }}
+                  {{ bluetoothManager.getConnectedStatus() ? "已连接" : "未连接" }}
                 </text>
               </view>
             </view>
@@ -47,10 +47,10 @@
             @tap="toggleBluetooth"
             :class="[
               'btn-bluetooth',
-              isBluetoothConnected ? 'disconnect' : 'connect',
+              bluetoothManager.getConnectedStatus() ? 'disconnect' : 'connect',
             ]"
           >
-            {{ isBluetoothConnected ? "断开" : "连接" }}
+            {{ bluetoothManager.getConnectedStatus() ? "断开" : "连接" }}
           </button>
         </view>
       </view>
@@ -125,13 +125,13 @@
           <!-- 激活按钮 -->
           <button
             @tap="handleActivate"
-            :disabled="!isBluetoothConnected"
+            :disabled="!bluetoothManager.getConnectedStatus()"
             :class="[
               'btn-activate',
-              isBluetoothConnected ? 'enabled' : 'disabled',
+              bluetoothManager.getConnectedStatus() ? 'enabled' : 'disabled',
             ]"
           >
-            <view v-if="isBluetoothConnected" class="shimmer-effect"></view>
+            <view v-if="bluetoothManager.getConnectedStatus()" class="shimmer-effect"></view>
             <text class="btn-text">激活设备</text>
           </button>
         </view>
@@ -166,9 +166,9 @@
 </template>
 
 <script>
-import BlueModal from "@/components/modal/BlueModal.vue";
-import { sendData } from "@/util/sendInfo.js";
-import bluetoothManager from "@/util/bluetoothManager.js";
+import BlueModal from "../../components/modal/BlueModal.vue";
+import { sendData } from "../../util/sendInfo.js";
+import bluetoothManager from "../../util/bluetoothManager.js";
 
 export default {
   components: {
@@ -176,7 +176,6 @@ export default {
   },
   data() {
     return {
-      isBluetoothConnected: false,
       activationCode: "",
       activationCodeParts: ["", "", "", ""],
       message: {
@@ -185,7 +184,7 @@ export default {
       },
       blueModalShow: false,
       blueList: [],
-      connectedDeviceId: null,
+      bluetoothManager: bluetoothManager,
     };
   },
   watch: {
@@ -197,14 +196,12 @@ export default {
   },
   methods: {
     toggleBluetooth() {
-      if (this.isBluetoothConnected) {
+      if (this.bluetoothManager.getConnectedStatus()) {
         // 断开蓝牙连接
-        bluetoothManager
+        this.bluetoothManager
           .disconnect()
           .then(() => {
             console.log("蓝牙连接已断开");
-            this.isBluetoothConnected = false;
-            this.connectedDeviceId = null;
             this.message = {
               type: "info",
               text: "蓝牙连接已断开",
@@ -227,15 +224,15 @@ export default {
 
       try {
         // 初始化蓝牙模块
-        await bluetoothManager.initBlue();
+        await this.bluetoothManager.initBlue();
         console.log("蓝牙模块初始化成功");
 
         // 开始搜索蓝牙设备
-        await bluetoothManager.startDiscovery();
+        await this.bluetoothManager.startDiscovery();
         console.log("开始搜索蓝牙设备");
 
         // 监听蓝牙设备发现事件
-        bluetoothManager.onBluetoothDeviceFound((res) => {
+        this.bluetoothManager.onBluetoothDeviceFound((res) => {
           const devices = res.devices;
           devices.forEach((device) => {
             // 过滤掉重复设备和没有名称的设备
@@ -259,13 +256,11 @@ export default {
     async handleBlueConnect(device) {
       try {
         // 停止搜索蓝牙设备
-        await bluetoothManager.stopDiscovery();
+        await this.bluetoothManager.stopDiscovery();
 
         // 连接蓝牙设备
-        await bluetoothManager.connect(device);
+        await this.bluetoothManager.connect(device);
         console.log("蓝牙设备连接成功", device);
-        this.isBluetoothConnected = true;
-        this.connectedDeviceId = device.deviceId;
 
         this.blueModalShow = false;
         this.message = {
@@ -276,9 +271,9 @@ export default {
         // 连接成功后获取服务和特征值
         setTimeout(async () => {
           try {
-            await bluetoothManager.getServices();
-            await bluetoothManager.getCharacteristics();
-            await bluetoothManager.notify();
+            await this.bluetoothManager.getServices();
+            await this.bluetoothManager.getCharacteristics();
+            await this.bluetoothManager.notify();
             this.listenValueChange();
           } catch (err) {
             console.error("获取服务或特征值失败", err);
@@ -294,11 +289,22 @@ export default {
     },
     // 监听蓝牙设备值变化
     listenValueChange() {
-      bluetoothManager.listenValueChange((data) => {
+      this.bluetoothManager.listenValueChange((data) => {
         console.log("监听蓝牙设备传过来的值:", data);
 
+        // 验证蓝牙设备是否正确
+        const isDeviceValid = this.bluetoothManager.validateBluetoothDevice(data);
+        if (!isDeviceValid) {
+          // 设备验证失败，显示错误信息
+          this.message = {
+            type: "error",
+            text: "连接的蓝牙设备不正确",
+          };
+          return;
+        }
+
         // 解析激活状态
-        const activationStatus = bluetoothManager.parseActivationStatus(data);
+        const activationStatus = this.bluetoothManager.parseActivationStatus(data);
 
         if (activationStatus === 1) {
           // 激活状态为1，加载loading并跳转到主页
@@ -363,7 +369,7 @@ export default {
       this.activationCode = this.activationCodeParts.join("-");
     },
     handleActivate() {
-      if (this.isBluetoothConnected) {
+      if (this.bluetoothManager.getConnectedStatus()) {
         this.message = {
           type: "info",
           text: "激活成功！设备已就绪",

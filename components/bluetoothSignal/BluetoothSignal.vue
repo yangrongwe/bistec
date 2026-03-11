@@ -1,14 +1,14 @@
 <template>
 	<view class="bluetooth-signal-box">
 		<template v-if="right">
-			<image class="signal-back" :src="signalBackRight" alt="">
+			<image class="signal-back" :src="signalBackRight" alt=""></image>
 			<image class="progress-back-second left" :src="progressBackRight" mode=""></image>
 			<image class="progress-back-first right" :src="progressBackRight" mode=""></image>
 			<image v-if="first!=0" class="progress-second left" :src="progressFirstRight+first+'.png'" mode=""></image>
 			<image v-if="second!=0" class="progress-first right" :src="progressSecondRight+second+'.png'" mode=""></image>
 		</template>
 		<template v-else>
-			<image class="signal-back" :src="signalBack" alt="">
+			<image class="signal-back" :src="signalBack" alt=""></image>
 			<image class="progress-back-first left" :src="progressBack" mode=""></image>
 			<image class="progress-back-second right" :src="progressBack" mode=""></image>
 			<image v-if="first!=0" class="progress-first left" :src="progressFirst+first+'.png'" mode=""></image>
