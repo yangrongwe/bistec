@@ -396,7 +396,7 @@ class BluetoothManager {
     const { output1, output2, output3 } = data;
 
     // 输出1解析 - 基础工况与模式控制
-    const activationFlag = (output1 >> 6) & 0x07; // 激活标志位 (位8-6)
+    const activationFlag = (output1 >> 5) & 0x07; // 激活标志位 (位8-6)
     const workConditionInt = (output1 >> 3) & 0x07; // 工况标识 (位5-3)
     const mode = (output1 >> 1) & 0x03; // 当前模式反馈 (位2-1)
 
@@ -474,7 +474,7 @@ class BluetoothManager {
   parseActivationStatus(data) {
     const { output1 } = data;
     // 激活标志位：位8~6（对应output1的bit6-8）
-    let activationStatus = (output1 >> 6) & 0x07;
+    let activationStatus = (output1 >> 5) & 0x07;
     console.log("激活状态:", activationStatus);
     return activationStatus;
   }

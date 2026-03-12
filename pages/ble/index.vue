@@ -200,6 +200,7 @@ export default {
       bluetoothManager: bluetoothManager,
       hasValidData: false, // 是否收到有效监听值
       hasDeviceDataError: false, // 是否已经显示设备数据错误
+      hasNavigated: false, // 是否已跳转到主页，避免重复跳转
     };
   },
   watch: {
@@ -413,8 +414,9 @@ export default {
         const activationStatus =
           this.bluetoothManager.parseActivationStatus(data);
 
-        if (activationStatus === 1) {
+        if (activationStatus === 1 && !this.hasNavigated) {
           // 激活状态为1，加载loading并跳转到主页
+          this.hasNavigated = true; // 设置已跳转标志，避免重复跳转
           uni.showLoading({
             title: "加载中...",
             mask: true,
@@ -576,12 +578,12 @@ export default {
       //   }
 
       // 跳转前关闭监听，避免重复监听
-      try {
-        uni.offBLECharacteristicValueChange();
-        console.log("已关闭蓝牙监听");
-      } catch (e) {
-        console.error("关闭监听失败", e);
-      }
+    //   try {
+    //     uni.offBLECharacteristicValueChange();
+    //     console.log("已关闭蓝牙监听");
+    //   } catch (e) {
+    //     console.error("关闭监听失败", e);
+    //   }
 
       // 调用sendData方法，初始化所有参数为0，modeIndex为1
       const mockThat = {
@@ -590,14 +592,16 @@ export default {
         sceneListIndex: 0,
         activateFlag: 1, // 激活标志位设为1（激活）
       };
-      sendData(1, mockThat);
+      
+      // 等待sendData完成后再跳转
+      try {
+        await sendData(1, mockThat);
+        console.log("发送激活数据成功");
+      } catch (error) {
+        console.error("发送激活数据失败", error);
+      }
 
-      // 1秒后跳转到主页
-      setTimeout(() => {
-        uni.navigateTo({
-          url: "/pages/index/index",
-        });
-      }, 1000);
+      // 不再需要手动跳转，因为sendData后会通过监听值变化自动跳转
     },
     closeMessage() {
       this.message = { type: null, text: "" };

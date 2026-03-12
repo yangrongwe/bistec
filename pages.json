@@ -4,6 +4,7 @@
       "path": "pages/ble/index",
       "style": {
         "navigationStyle": "custom"
+        "disableSwipeBack": true // 单独页面禁用（优先级高于全局）
       }
     },
     {
