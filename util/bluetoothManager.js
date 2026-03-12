@@ -519,22 +519,35 @@ class BluetoothManager {
       return false;
     }
 
+    // 使用uni.getBluetoothAdapterState检查蓝牙状态（uni-app官方标准API）
     return new Promise((resolve) => {
-      uni.getBLEDeviceState({
-        success: (res) => {
-          if (res.available && res.connected) {
-            this.connectedStatus = true;
-            resolve(true);
-          } else {
-            this.connectedStatus = false;
-            resolve(false);
-          }
-        },
-        fail: () => {
+      try {
+        if (typeof uni.getBluetoothAdapterState === 'function') {
+          uni.getBluetoothAdapterState({
+            success: (res) => {
+              if (res.available && res.connected) {
+                this.connectedStatus = true;
+                resolve(true);
+              } else {
+                this.connectedStatus = false;
+                resolve(false);
+              }
+            },
+            fail: () => {
+              this.connectedStatus = false;
+              resolve(false);
+            },
+          });
+        } else {
+          // API不可用，直接返回false
           this.connectedStatus = false;
           resolve(false);
-        },
-      });
+        }
+      } catch (error) {
+        // 发生错误，直接返回false
+        this.connectedStatus = false;
+        resolve(false);
+      }
     });
   }
 }

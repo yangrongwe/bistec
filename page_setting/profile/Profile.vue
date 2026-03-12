@@ -158,6 +158,23 @@ export default {
                 activateFlag: 0, // 激活标志位设为0（去激活）
               };
               sendData(1, mockThat);
+
+                // 断开蓝牙连接
+                await bluetoothManager.disconnect();
+                // 重置蓝牙状态
+                bluetoothManager.reset();
+                // 从列表中移除
+                // this.products.splice(index, 1);
+                uni.showToast({
+                  title: "已去激活",
+                  icon: "none",
+                });
+                // 返回激活画面
+                setTimeout(() => {
+                  uni.navigateTo({
+                    url: "/pages/ble/index",
+                  });
+                }, 1000);
             } catch (err) {
               console.error("去激活失败", err);
               uni.showToast({

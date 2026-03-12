@@ -30,9 +30,11 @@ export function sendData(modeIndex, that) {
 	if (activateFlag === 1) {
 		data += (1 << 20); // 激活标志位设为1
 	}
-	console.log("各部分值: mode=", mode, "la_ya=", la_ya, "hou_xuan_jia=", hou_xuan_jia, "ce_qing=", ce_qing, "qian_xuan_jia=", qian_xuan_jia, "kuai_su_tiao_jie=", kuai_su_tiao_jie);
+	console.log("各部分值: mode=", mode, "la_ya=", la_ya, "hou_xuan_jia=", hou_xuan_jia, "ce_qing=", ce_qing, "qian_xuan_jia=", qian_xuan_jia, "kuai_su_tiao_jie=", kuai_su_tiao_jie, "activateFlag=", activateFlag);
 	console.log("发送的数据***************", data);
-	console.log("二进制表示:", data.toString(2));
+	// 确保二进制表示为32位
+	const binaryString = data.toString(2).padStart(32, '0');
+	console.log("二进制表示:", binaryString);
 	console.log("分段表示: 激活标志位(23-21):", (data >> 21).toString(2).padStart(3, '0'), 
 		"快速调节(20-19):", ((data >> 19) & 0x03).toString(2).padStart(2, '0'),
 		"前悬架(18-15):", ((data >> 15) & 0x0f).toString(2).padStart(4, '0'),
@@ -40,10 +42,15 @@ export function sendData(modeIndex, that) {
 		"后悬架(10-7):", ((data >> 7) & 0x0f).toString(2).padStart(4, '0'),
 		"拉压(6-3):", ((data >> 3) & 0x0f).toString(2).padStart(4, '0'),
 		"模式(2-1):", (data & 0x03).toString(2).padStart(2, '0'));
+	// 验证各参数的计算是否正确
+	const baseData = mode + (la_ya << 2) + (hou_xuan_jia << 6) + (ce_qing << 10) + (qian_xuan_jia << 14) + (kuai_su_tiao_jie << 18);
+	console.log("基础数据(不含激活标志位):", baseData);
+	console.log("激活标志位值:", activateFlag === 1 ? (1 << 20) : 0);
+	console.log("计算验证: baseData + activateFlagValue =", baseData + (activateFlag === 1 ? (1 << 20) : 0));
 
 	// 构造数据帧：针头 + 数据 + 针尾
 	var buff = new Uint8Array(12);
-	// 针头：FE FE FF FF
+	// 针头：FF FF FE FE
 	buff[0] = 0xFF;
 	buff[1] = 0xFF;
 	buff[2] = 0xFE;
@@ -53,7 +60,7 @@ export function sendData(modeIndex, that) {
 	buff[5] = (data >> 8) & 0xFF;
 	buff[6] = (data >> 16) & 0xFF;
 	buff[7] = (data >> 24) & 0xFF;
-	// 针尾：FF FF FE FE
+	// 针尾：FE FE FF FF
 	buff[8] = 0xFE;
 	buff[9] = 0xFE;
 	buff[10] = 0xFF;

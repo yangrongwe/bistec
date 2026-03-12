@@ -192,7 +192,12 @@ export default {
     isOk(val) {
       if (val && !this.scanFlag) {
         if (uni.getStorageSync("deviceId")) {
-          this.scan();
+          // 直接检查蓝牙连接状态，避免重新初始化
+          console.log("蓝牙已连接，无需重新初始化");
+          // 更新蓝牙信号图标
+          this.bluetoothSignal = "https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/iconImage/bluetooth_3.png";
+          // 重新开始监听
+        //   this.listenValueChange();
         } else {
           this.modalShow = true;
         }
@@ -690,7 +695,12 @@ export default {
         this.isOk,
       );
       if (uni.getStorageSync("deviceId")) {
-        this.scan();
+        // 直接使用已连接的状态，避免重新初始化
+        console.log("蓝牙已连接，无需重新初始化");
+        // 更新蓝牙信号图标
+        this.bluetoothSignal = "https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/iconImage/bluetooth_3.png";
+        // 重新开始监听
+        this.listenValueChange();
       } else {
         this.modalShow = true;
       }
