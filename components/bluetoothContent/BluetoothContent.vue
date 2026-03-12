@@ -498,8 +498,6 @@ export default {
       console.log("onBLECharacteristicValueChange已经开启监听");
 
       this.bluetoothManager.listenValueChange((data) => {
-        console.log("监听的值", data);
-
         // 验证蓝牙设备是否正确
         const isDeviceValid =
           that.bluetoothManager.validateBluetoothDevice(data);
@@ -533,10 +531,10 @@ export default {
         // 模式反馈
         const mode = parsedData.mode;
         if (that.currentMode != mode) {
+          that.currentMode = mode;
           store.commit("changeSettingStatus", mode);
-          uni.setStorageSync("currentMode", that.currentMode);
+          uni.setStorageSync("currentMode", mode);
         }
-        that.currentMode = mode;
 
         // GX GY
         that.G = parsedData.G;
@@ -690,20 +688,21 @@ export default {
     this.totalHeight = this.statusBarHeight + this.navigatorHeight;
 
     if (this.isOk) {
-      console.log(
-        "==========================created================",
-        this.isOk,
-      );
       if (uni.getStorageSync("deviceId")) {
         // 直接使用已连接的状态，避免重新初始化
-        console.log("蓝牙已连接，无需重新初始化");
         // 更新蓝牙信号图标
         this.bluetoothSignal = "https://bistec.cn/photo/pics/smallApp/wxb90a7178ae2b176e/iconImage/bluetooth_3.png";
-        // 重新开始监听
+        // 开始监听
         this.listenValueChange();
       } else {
         this.modalShow = true;
       }
+    }
+  },
+  onShow() {
+    // 每次组件显示时重新启动监听
+    if (this.isOk && uni.getStorageSync("deviceId")) {
+      this.listenValueChange();
     }
   },
 };

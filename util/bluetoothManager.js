@@ -257,32 +257,28 @@ class BluetoothManager {
 
   // 监听特征值变化
   listenValueChange(callback) {
+    // 先移除之前的监听，避免重复注册
+    uni.offBLECharacteristicValueChange();
+    
     this.listenCallback = callback;
     uni.onBLECharacteristicValueChange((res) => {
-      console.log("监听的值", res.value);
-
       var uint8Data = new Uint8Array(res.value);
       var dataView = new DataView(uint8Data.buffer);
 
       // 检查数据长度是否足够（针头4字节 + 3个输出值12字节 + 针尾4字节 = 20字节）
       if (dataView.byteLength < 20) {
-        console.info("数据长度不足");
         return;
       }
 
       // 验证针头 (FEFEFFFF)
       const header = dataView.getUint32(0, true);
-      console.log("header",header)
       if (header !== 0xFEFEFFFF) {
-        console.info("数据针头不正确");
         return;
       }
 
       // 验证针尾 (FFFFFEFE)
       const footer = dataView.getUint32(16, true);
-      console.log("footer",footer)
       if (footer !== 0xFFFFFEFE) {
-        console.info("数据针尾不正确");
         return;
       }
 
@@ -316,7 +312,6 @@ class BluetoothManager {
     }
 
     // 只验证数据针头针尾，不验证具体值范围
-    console.log("蓝牙设备验证成功");
     return true;
   }
 
@@ -475,7 +470,7 @@ class BluetoothManager {
     const { output1 } = data;
     // 激活标志位：位8~6（对应output1的bit6-8）
     let activationStatus = (output1 >> 5) & 0x07;
-    console.log("激活状态:", activationStatus);
+    // console.log("激活状态:", activationStatus);
     return activationStatus;
   }
 
