@@ -264,27 +264,37 @@ class BluetoothManager {
       var uint8Data = new Uint8Array(res.value);
       var dataView = new DataView(uint8Data.buffer);
 
-      // 检查数据长度是否足够
-      if (dataView.byteLength < 24) {
+      // 检查数据长度是否足够（针头4字节 + 3个输出值12字节 + 针尾4字节 = 20字节）
+      if (dataView.byteLength < 20) {
         console.info("数据长度不足");
         return;
       }
 
-      // 解析6个32位输出值
-      const output1 = dataView.getUint32(0, true); // 输出1
-      const output2 = dataView.getUint32(4, true); // 输出2
-      const output3 = dataView.getUint32(8, true); // 输出3
-      const output4 = dataView.getUint32(12, true); // 输出4
-      const output5 = dataView.getUint32(16, true); // 输出5
-      const output6 = dataView.getUint32(20, true); // 输出6
+      // 验证针头 (FEFEFFFF)
+      const header = dataView.getUint32(0, true);
+      console.log("header",header)
+      if (header !== 0xFEFEFFFF) {
+        console.info("数据针头不正确");
+        return;
+      }
+
+      // 验证针尾 (FFFFFEFE)
+      const footer = dataView.getUint32(16, true);
+      console.log("footer",footer)
+      if (footer !== 0xFFFFFEFE) {
+        console.info("数据针尾不正确");
+        return;
+      }
+
+      // 解析3个32位输出值
+      const output1 = dataView.getUint32(4, true); // 输出1：基础工况与模式控制
+      const output2 = dataView.getUint32(8, true); // 输出2：悬架强度与 G 值参数
+      const output3 = dataView.getUint32(12, true); // 输出3：四悬架阻尼参数
 
       const parsedData = {
         output1,
         output2,
         output3,
-        output4,
-        output5,
-        output6,
         rawData: res.value,
       };
 
@@ -297,40 +307,15 @@ class BluetoothManager {
     // 检查数据是否包含所有必要的字段
     if (
       !data ||
-      !data.output1 ||
-      !data.output2 ||
-      !data.output3 ||
-      !data.output4 ||
-      !data.output5 ||
-      !data.output6
+      data.output1 === undefined ||
+      data.output2 === undefined ||
+      data.output3 === undefined
     ) {
       console.log("蓝牙设备数据格式不正确");
       return false;
     }
 
-    // 检查数据范围是否合理
-    const activationFlag = (data.output1 >> 6) & 0x07;
-    const workConditionInt = (data.output1 >> 3) & 0x07;
-    const mode = (data.output1 >> 1) & 0x03;
-
-    // 验证激活标志位范围
-    if (activationFlag < 0 || activationFlag > 7) {
-      console.log("激活标志位范围不正确");
-      return false;
-    }
-
-    // 验证工况标识范围
-    if (workConditionInt < 0 || workConditionInt > 4) {
-      console.log("工况标识范围不正确");
-      return false;
-    }
-
-    // 验证模式范围
-    if (mode < 0 || mode > 3) {
-      console.log("模式范围不正确");
-      return false;
-    }
-
+    // 只验证数据针头针尾，不验证具体值范围
     console.log("蓝牙设备验证成功");
     return true;
   }
@@ -408,16 +393,12 @@ class BluetoothManager {
 
   // 解析蓝牙数据
   parseBluetoothData(data) {
-    const { output1, output2, output3, output4, output5, output6 } = data;
+    const { output1, output2, output3 } = data;
 
-    // 输出1解析
-    const drawStrength = (output1 >> 28) & 0x0f; // 拉压强度 (1-9)
-    const rearSuspension = (output1 >> 24) & 0x0f; // 后悬架强度 (1-9)
-    const rollStrength = (output1 >> 20) & 0x0f; // 侧倾强度 (1-9)
-    const frontSuspension = (output1 >> 16) & 0x0f; // 前悬架强度 (1-9)
-    const activationFlag = (output1 >> 6) & 0x07; // 激活标志位 (0-7)
-    const workConditionInt = (output1 >> 3) & 0x07; // 工况标识 (0-4)
-    const mode = (output1 >> 1) & 0x03; // 当前模式反馈 (0-3)
+    // 输出1解析 - 基础工况与模式控制
+    const activationFlag = (output1 >> 6) & 0x07; // 激活标志位 (位8-6)
+    const workConditionInt = (output1 >> 3) & 0x07; // 工况标识 (位5-3)
+    const mode = (output1 >> 1) & 0x03; // 当前模式反馈 (位2-1)
 
     // 工况
     let workCondition = "";
@@ -441,25 +422,27 @@ class BluetoothManager {
         workCondition = "unknown";
     }
 
-    // 输出2解析 - G值
-    const gxRaw = (output2 >> 16) & 0xffff; // X轴加速度原始值 (0-1000)
-    const gyRaw = output2 & 0xffff; // Y轴加速度原始值 (0-1000)
+    // 输出2解析 - 悬架强度与 G 值参数
+    const drawStrength = (output2 >> 29) & 0x0f; // 拉压强度 (位32-29)
+    const rearSuspension = (output2 >> 25) & 0x0f; // 后悬架强度 (位28-25)
+    const rollStrength = (output2 >> 21) & 0x0f; // 侧倾强度 (位24-21)
+    const frontSuspension = (output2 >> 17) & 0x0f; // 前悬架强度 (位20-17)
+    const gxRaw = (output2 >> 9) & 0xff; // X轴加速度原始值 (位16-9, 0-200)
+    const gyRaw = output2 & 0xff; // Y轴加速度原始值 (位8-1, 0-200)
     const G = {
-      GX: (gxRaw - 500) / 1000, // 实际G值
-      GY: (gyRaw - 500) / 1000, // 实际G值
+      GX: (gxRaw - 100) / 100, // 实际G值 (当前G值/g×100+100)
+      GY: (gyRaw - 100) / 100, // 实际G值 (当前G值/g×100+100)
     };
 
-    // 输出3解析 - 前悬架阻尼
-    const FLCompress = (output3 >> 24) & 0xff; // 左前压缩阻尼 (0-100)
-    const FLDraw = (output3 >> 16) & 0xff; // 左前复原阻尼 (0-100)
-    const FRCompress = (output3 >> 8) & 0xff; // 右前压缩阻尼 (0-100)
-    const FRDraw = output3 & 0xff; // 右前复原阻尼 (0-100)
-
-    // 输出4解析 - 后悬架阻尼
-    const RLCompress = (output4 >> 24) & 0xff; // 左后压缩阻尼 (0-100)
-    const RLDraw = (output4 >> 16) & 0xff; // 左后拉伸阻尼 (0-100)
-    const RRCompress = (output4 >> 8) & 0xff; // 右后压缩阻尼 (0-100)
-    const RRDraw = output4 & 0xff; // 右后拉伸阻尼 (0-100)
+    // 输出3解析 - 四悬架阻尼参数
+    const FLCompress = (output3 >> 29) & 0x0f; // FL压缩阻尼 (位32-29, 0-8)
+    const FLDraw = (output3 >> 25) & 0x0f; // FL拉伸阻尼 (位28-25, 0-8)
+    const FRCompress = (output3 >> 21) & 0x0f; // FR压缩阻尼 (位24-21, 0-8)
+    const FRDraw = (output3 >> 17) & 0x0f; // FR拉伸阻尼 (位20-17, 0-8)
+    const RLCompress = (output3 >> 13) & 0x0f; // RL压缩阻尼 (位16-13, 0-8)
+    const RLDraw = (output3 >> 9) & 0x0f; // RL拉伸阻尼 (位12-9, 0-8)
+    const RRCompress = (output3 >> 5) & 0x0f; // RR压缩阻尼 (位8-5, 0-8)
+    const RRDraw = (output3 >> 1) & 0x0f; // RR拉伸阻尼 (位4-1, 0-8)
 
     // 阻尼设定
     const DC = {
@@ -473,25 +456,12 @@ class BluetoothManager {
       RRDraw,
     };
 
-    // 输出5解析 - 垂向加速度
-    const springAccRaw = (output5 >> 16) & 0xffff; // 簧下垂向加速度原始值 (0-1000)
-    const bodyAccRaw = output5 & 0xffff; // 车身垂向加速度原始值 (0-1000)
-    const verticalAcc = {
-      spring: (springAccRaw - 500) / 1000, // 簧下垂向加速度实际G值
-      body: (bodyAccRaw - 500) / 1000, // 车身垂向加速度实际G值
-    };
-
-    // 输出6解析 - 车速
-    const speed = output6 & 0xffff; // 车速 (0-200 km/h)
-
     return {
       DC,
       workCondition,
       workConditionCode: workConditionInt,
       mode,
       G,
-      verticalAcc,
-      speed,
       drawStrength,
       frontSuspension,
       rearSuspension,
