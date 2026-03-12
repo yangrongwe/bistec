@@ -1,3 +1,5 @@
+import bluetoothManager from './bluetoothManager.js';
+
 export function sendData(modeIndex, that) {
 	// 当前模式
 	var mode = modeIndex; // 位2~1
@@ -67,25 +69,68 @@ export function sendData(modeIndex, that) {
 	buff[11] = 0xFF;
 	console.log("发送的数据***********buff****", buff.buffer);
 
-	uni.writeBLECharacteristicValue({
-		deviceId: uni.getStorageSync("deviceId"), // 设备ID
-		serviceId: uni.getStorageSync("uuidServices"), // 服务UUID
-		characteristicId: uni.getStorageSync("writeCharacteristicId"), // 特征值
-		value: buff.buffer,
-		success(res) {
-			console.log('发送数据成功', res);
-			uni.showToast({
-				title: '已应用',
-				duration: 2000
-			});
-		},
-		fail(err) {
-			console.error('发送数据失败', err);
-			uni.showToast({
-				title: '应用失败，请检查蓝牙连接状态',
-				icon: 'none',
-				duration: 2000
-			});
+	// 发送命令前停止监听
+	try {
+		uni.offBLECharacteristicValueChange();
+		console.log("已停止蓝牙监听");
+	} catch (e) {
+		console.error("停止监听失败", e);
+	}
+
+	// 使用bluetoothManager实例发送数据
+	bluetoothManager.sendData(buff.buffer).then((res) => {
+		console.log('发送数据成功', res);
+		uni.showToast({
+			title: '已应用',
+			duration: 2000
+		});
+		
+		// 发送命令后开启监听（除了去激活命令）
+		if (activateFlag !== 0) {
+			try {
+				// 重新开启监听
+				console.log("重新开启蓝牙监听");
+				// 重新开启特征值变化监听
+				bluetoothManager.notify().then(() => {
+					console.log("特征值监听已开启");
+					// 重新注册特征值变化回调
+					if (bluetoothManager.listenCallback) {
+						bluetoothManager.listenValueChange(bluetoothManager.listenCallback);
+						console.log("特征值变化回调已重新注册");
+					}
+				}).catch((err) => {
+					console.error("开启特征值监听失败", err);
+				});
+			} catch (e) {
+				console.error("开启监听失败", e);
+			}
+		}
+	}).catch((err) => {
+		console.error('发送数据失败', err);
+		uni.showToast({
+			title: '应用失败，请检查蓝牙连接状态',
+			icon: 'none',
+			duration: 2000
+		});
+		
+		// 发送失败也重新开启监听（除了去激活命令）
+		if (activateFlag !== 0) {
+			try {
+				console.log("重新开启蓝牙监听");
+				// 重新开启特征值变化监听
+				bluetoothManager.notify().then(() => {
+					console.log("特征值监听已开启");
+					// 重新注册特征值变化回调
+					if (bluetoothManager.listenCallback) {
+						bluetoothManager.listenValueChange(bluetoothManager.listenCallback);
+						console.log("特征值变化回调已重新注册");
+					}
+				}).catch((err) => {
+					console.error("开启特征值监听失败", err);
+				});
+			} catch (e) {
+				console.error("开启监听失败", e);
+			}
 		}
 	});
 }

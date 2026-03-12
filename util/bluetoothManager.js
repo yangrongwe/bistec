@@ -397,8 +397,8 @@ class BluetoothManager {
 
     // 输出1解析 - 基础工况与模式控制
     const activationFlag = (output1 >> 5) & 0x07; // 激活标志位 (位8-6)
-    const workConditionInt = (output1 >> 3) & 0x07; // 工况标识 (位5-3)
-    const mode = (output1 >> 1) & 0x03; // 当前模式反馈 (位2-1)
+    const workConditionInt = (output1 >> 2) & 0x07; // 工况标识 (位5-3)
+    const mode = output1 & 0x03; // 当前模式反馈 (位2-1)
 
     // 工况
     let workCondition = "";

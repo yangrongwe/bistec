@@ -203,6 +203,9 @@ export default {
       hasNavigated: false, // 是否已跳转到主页，避免重复跳转
     };
   },
+  onLoad() {
+    this.hasNavigated=false;
+  },
   watch: {
     blueModalShow(newVal) {
       if (newVal) {
@@ -413,7 +416,7 @@ export default {
         // 解析激活状态
         const activationStatus =
           this.bluetoothManager.parseActivationStatus(data);
-
+        console.log("hasNavigated",this.hasNavigated)
         if (activationStatus === 1 && !this.hasNavigated) {
           // 激活状态为1，加载loading并跳转到主页
           this.hasNavigated = true; // 设置已跳转标志，避免重复跳转
@@ -478,6 +481,7 @@ export default {
       this.activationCode = this.activationCodeParts.join("-");
     },
     async handleActivate() {
+        this.hasNavigated = false;
       //   if (this.bluetoothManager.getConnectedStatus() && this.hasValidData) {
       //     try {
       //       // 显示加载中
