@@ -8,6 +8,8 @@ export function sendData(modeIndex, that) {
 	var qian_xuan_jia = (that.gaugeList && that.gaugeList[0] && that.gaugeList[0].progress) || 1; // 前悬架强度 位18~15
 	// 快速调节
 	var kuai_su_tiao_jie = that.sceneListIndex || 0; // 位20~19
+	// 激活标志位
+	var activateFlag = that.activateFlag ?? 1; // 默认为1（激活）
 
 	// 原始数据计算 - 使用正确的位偏移
 	// 激活标志位(23-21): 2^20
@@ -22,8 +24,12 @@ export function sendData(modeIndex, that) {
 		(hou_xuan_jia << 6) +
 		(ce_qing << 10) +
 		(qian_xuan_jia << 14) +
-		(kuai_su_tiao_jie << 18) +
-		(1 << 20); // 激活标志位设为1
+		(kuai_su_tiao_jie << 18);
+	
+	// 激活标志位设置
+	if (activateFlag === 1) {
+		data += (1 << 20); // 激活标志位设为1
+	}
 	console.log("各部分值: mode=", mode, "la_ya=", la_ya, "hou_xuan_jia=", hou_xuan_jia, "ce_qing=", ce_qing, "qian_xuan_jia=", qian_xuan_jia, "kuai_su_tiao_jie=", kuai_su_tiao_jie);
 	console.log("发送的数据***************", data);
 	console.log("二进制表示:", data.toString(2));

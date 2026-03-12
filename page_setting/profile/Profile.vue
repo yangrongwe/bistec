@@ -51,13 +51,14 @@
               </view>
             </view>
             <view class="actions">
-              <button
+              <!-- <button
                 v-if="p.sn === connectedDeviceName"
                 class="unbind"
                 @tap="unbind(i)"
               >
                 去激活
-              </button>
+              </button> -->
+              <button class="unbind" @tap="unbind(i)">去激活</button>
             </view>
           </view>
           <view v-if="!products.length" class="empty">暂无绑定产品</view>
@@ -69,6 +70,7 @@
 
 <script>
 import bluetoothManager from "../../util/bluetoothManager.js";
+import { sendData } from "../../util/sendInfo.js";
 export default {
   name: "Profile",
   data() {
@@ -105,30 +107,17 @@ export default {
         this.loading = true;
         this.error = "";
 
-        // 获取微信 ID
-        const wechatId = uni.getStorageSync("wechatId") || "wx123456";
-
-        // 调用 API 获取产品数据
-        const response = await new Promise((resolve, reject) => {
-          uni.request({
-            url: `http://localhost:8290/api/bound-products?wechatId=${wechatId}`,
-            method: "GET",
-            success: (res) => {
-              resolve(res);
-            },
-            fail: (err) => {
-              reject(err);
-            },
-          });
-        });
-
-        if (response.statusCode === 200 && response.data) {
-          // 假设 API 返回的数据格式为 { data: [...] }
-          this.products = response.data.data || [];
-        } else {
-          this.error = "获取产品数据失败";
-          this.products = [];
-        }
+        // 使用假数据
+        this.products = [
+          {
+            id: 1,
+            sn: "SN123456",
+            code: "ACT789012",
+            time: "2026-03-12 10:00:00",
+            bluetoothName: "APP-13124",
+            deviceId: "device123"
+          }
+        ];
       } catch (err) {
         console.error("获取产品数据失败", err);
         this.error = "网络连接异常";
@@ -145,22 +134,30 @@ export default {
         success: async (res) => {
           if (res.confirm) {
             try {
-              // 断开蓝牙连接
-              await bluetoothManager.disconnect();
-              // 重置蓝牙状态
-              bluetoothManager.reset();
-              // 从列表中移除
-              this.products.splice(index, 1);
-              uni.showToast({
-                title: "已去激活",
-                icon: "none",
-              });
-              // 返回激活画面
-              setTimeout(() => {
-                uni.navigateTo({
-                  url: "/pages/ble/index",
-                });
-              }, 1000);
+              //   // 断开蓝牙连接
+              //   await bluetoothManager.disconnect();
+              //   // 重置蓝牙状态
+              //   bluetoothManager.reset();
+              //   // 从列表中移除
+              //   this.products.splice(index, 1);
+              //   uni.showToast({
+              //     title: "已去激活",
+              //     icon: "none",
+              //   });
+              //   // 返回激活画面
+              //   setTimeout(() => {
+              //     uni.navigateTo({
+              //       url: "/pages/ble/index",
+              //     });
+              //   }, 1000);
+              // 调用sendData方法，初始化所有参数为0，modeIndex为1
+              const mockThat = {
+                drawProgress: 0,
+                gaugeList: [{ progress: 0 }, { progress: 0 }, { progress: 0 }],
+                sceneListIndex: 0,
+                activateFlag: 0, // 激活标志位设为0（去激活）
+              };
+              sendData(1, mockThat);
             } catch (err) {
               console.error("去激活失败", err);
               uni.showToast({

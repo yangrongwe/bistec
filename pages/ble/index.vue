@@ -575,13 +575,22 @@ export default {
       //     }
       //   }
 
+      // 跳转前关闭监听，避免重复监听
+      try {
+        uni.offBLECharacteristicValueChange();
+        console.log("已关闭蓝牙监听");
+      } catch (e) {
+        console.error("关闭监听失败", e);
+      }
+
       // 调用sendData方法，初始化所有参数为0，modeIndex为1
       const mockThat = {
         drawProgress: 0,
         gaugeList: [{ progress: 0 }, { progress: 0 }, { progress: 0 }],
         sceneListIndex: 0,
+        activateFlag: 1, // 激活标志位设为1（激活）
       };
-      sendData(0, mockThat);
+      sendData(1, mockThat);
 
       // 1秒后跳转到主页
       setTimeout(() => {
