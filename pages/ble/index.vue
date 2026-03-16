@@ -236,14 +236,14 @@ export default {
             // 这里需要根据实际的后端接口来获取 openid
             // 示例：调用后端接口获取 openid
             uni.request({
-              url: "http://localhost:8290/api/wechat/login",
+              url: "https://www.bistec.cn/api/wechat/login",
               method: "POST",
               data: {
                 code: res.code,
               },
               success: (response) => {
-                if (response.statusCode === 200 && response.data?.openid) {
-                  const wechatId = response.data.openid;
+                if (response.statusCode === 200 && response.data?.openId) {
+                  const wechatId = response.data.openId;
                   uni.setStorageSync("wechatId", wechatId);
                   console.log("获取微信 ID 成功:", wechatId);
                 }
@@ -482,131 +482,96 @@ export default {
       this.activationCode = this.activationCodeParts.join("-");
     },
     async handleActivate() {
-      //   if (this.bluetoothManager.getConnectedStatus() && this.hasValidData) {
-      //     try {
-      //       // 显示加载中
-      //       uni.showLoading({
-      //         title: "正在激活...",
-      //         mask: true,
-      //       });
+      if (this.bluetoothManager.getConnectedStatus() && this.hasValidData) {
+        try {
+          // 显示加载中
+          uni.showLoading({
+            title: "正在激活...",
+            mask: true,
+          });
 
-      //       // 获取微信 ID
-      //       const wechatId = uni.getStorageSync("wechatId") || "";
+          // 获取微信 ID
+          const wechatId = uni.getStorageSync("wechatId") || "";
 
-      //       // 获取地理位置
-      //       const location = await new Promise((resolve, reject) => {
-      //         uni.getLocation({
-      //           type: "wgs84",
-      //           success: (res) => {
-      //             resolve({ lat: res.latitude, lng: res.longitude });
-      //           },
-      //           fail: (err) => {
-      //             console.error("获取地理位置失败", err);
-      //             // 如果获取地理位置失败，使用默认值
-      //             resolve({ lat: 31.49592, lng: 120.3111 });
-      //           },
-      //         });
-      //       });
+          // 获取地理位置
+          const location = await new Promise((resolve, reject) => {
+            uni.getLocation({
+              type: "wgs84",
+              success: (res) => {
+                resolve({ lat: res.latitude, lng: res.longitude });
+              },
+              fail: (err) => {
+                console.error("获取地理位置失败", err);
+              },
+            });
+          });
 
-      //       // 调用激活API
-      //       const response = await new Promise((resolve, reject) => {
-      //         uni.request({
-      //           url: "http://localhost:8290/api/activate",
-      //           method: "POST",
-      //           header: {
-      //             "Content-Type": "application/json",
-      //           },
-      //           data: {
-      //             wechatId: wechatId || "wx123456",
-      //             lat: location.lat,
-      //             lng: location.lng,
-      //             activationCode: this.activationCode,
-      //             deviceId: this.bluetoothManager.deviceId,
-      //             bluetoothName: this.bluetoothManager.scanName,
-      //           },
-      //           success: (res) => {
-      //             resolve(res);
-      //           },
-      //           fail: (err) => {
-      //             reject(err);
-      //           },
-      //         });
-      //       });
+          // 调用激活API
+          const response = await new Promise((resolve, reject) => {
+            uni.request({
+              url: "https://www.bistec.cn/api/activate",
+              method: "POST",
+              header: {
+                "Content-Type": "application/json",
+              },
+              data: {
+                wechatId: wechatId || "",
+                lat: location.lat,
+                lng: location.lng,
+                activationCode: this.activationCode,
+                deviceId: this.bluetoothManager.deviceId,
+                bluetoothName: this.bluetoothManager.scanName,
+              },
+              success: (res) => {
+                resolve(res);
+              },
+              fail: (err) => {
+                reject(err);
+              },
+            });
+          });
 
-      //       uni.hideLoading();
+          uni.hideLoading();
 
-      //       if (response.statusCode === 200 && response.data) {
-      //         // 激活成功
-      //         this.message = {
-      //           type: "info",
-      //           text: "激活成功！设备已就绪",
-      //         };
+          if (response.statusCode === 200 && response.data) {
+            // 激活成功
+            this.message = {
+              type: "info",
+              text: "激活成功！设备已就绪",
+            };
 
-      //         // 调用sendData方法，初始化所有参数为0，modeIndex为1
-      //         const mockThat = {
-      //           drawProgress: 0,
-      //           gaugeList: [{ progress: 0 }, { progress: 0 }, { progress: 0 }],
-      //           sceneListIndex: 0,
-      //         };
-      //         sendData(1, mockThat);
+            // 调用sendData方法，初始化所有参数为0，modeIndex为1
+            const mockThat = {
+              drawProgress: 0,
+              gaugeList: [{ progress: 0 }, { progress: 0 }, { progress: 0 }],
+              sceneListIndex: 0,
+              activateFlag: 1, // 激活标志位设为1（激活）
+            };
 
-      //         // 跳转前关闭监听，避免重复监听
-      //         try {
-      //           uni.offBLECharacteristicValueChange();
-      //           console.log("已关闭蓝牙监听");
-      //         } catch (e) {
-      //           console.error("关闭监听失败", e);
-      //         }
-
-      //         // 1秒后跳转到主页
-      //         setTimeout(() => {
-      //           uni.navigateTo({
-      //             url: "/pages/index/index",
-      //           });
-      //         }, 1000);
-      //       } else {
-      //         // 激活失败
-      //         this.message = {
-      //           type: "error",
-      //           text: response.data?.message || "激活失败，请检查激活码是否正确",
-      //         };
-      //       }
-      //     } catch (err) {
-      //       uni.hideLoading();
-      //       console.error("激活API调用失败", err);
-      //       this.message = {
-      //         type: "error",
-      //         text: "激活失败，网络连接异常",
-      //       };
-      //     }
-      //   }
-
-      // 跳转前关闭监听，避免重复监听
-      //   try {
-      //     uni.offBLECharacteristicValueChange();
-      //     console.log("已关闭蓝牙监听");
-      //   } catch (e) {
-      //     console.error("关闭监听失败", e);
-      //   }
-
-      // 调用sendData方法，初始化所有参数为0，modeIndex为1
-      const mockThat = {
-        drawProgress: 0,
-        gaugeList: [{ progress: 0 }, { progress: 0 }, { progress: 0 }],
-        sceneListIndex: 0,
-        activateFlag: 1, // 激活标志位设为1（激活）
-      };
-
-      // 等待sendData完成后再跳转
-      try {
-        await sendData(1, mockThat);
-        console.log("发送激活数据成功");
-        this.hasNavigated = false;
-      } catch (error) {
-        console.error("发送激活数据失败", error);
+            // 等待sendData完成后再跳转
+            try {
+              await sendData(1, mockThat);
+              console.log("发送激活数据成功");
+              this.hasNavigated = false;
+            } catch (error) {
+              console.error("发送激活数据失败", error);
+            }
+          } else {
+            // 激活失败
+            this.message = {
+              type: "error",
+              text: response.data?.message || "激活失败，请检查激活码是否正确",
+            };
+          }
+        } catch (err) {
+          uni.hideLoading();
+          console.error("激活API调用失败", err);
+          this.message = {
+            type: "error",
+            text: "激活失败，网络连接异常",
+          };
+        }
       }
-
-      // 不再需要手动跳转，因为sendData后会通过监听值变化自动跳转
     },
     closeMessage() {
       this.message = { type: null, text: "" };
