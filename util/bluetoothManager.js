@@ -80,16 +80,18 @@ class BluetoothManager {
   async connect(device) {
     return new Promise((resolve, reject) => {
       this.deviceId = device.deviceId;
+      
+      // 确保存储和设置蓝牙名称，无论blueListFlag是什么值
+      if (device.name) {
+        uni.setStorageSync("scanName", device.name);
+        this.scanName = device.name;
+      }
 
       uni.createBLEConnection({
         deviceId: this.deviceId,
         success: (res) => {
           console.log("连接蓝牙设备成功");
           uni.setStorageSync("deviceId", device.deviceId);
-          if (this.blueListFlag) {
-            uni.setStorageSync("scanName", device.name);
-            this.scanName = device.name;
-          }
           this.blueListFlag = false;
           this.connectedStatus = true;
           resolve(res);
