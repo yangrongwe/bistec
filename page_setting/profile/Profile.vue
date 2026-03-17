@@ -40,19 +40,18 @@
                             </view>
                             <view class="divider"></view>
                             <view class="row">
-                                <text class="label">DeviceId</text>
-                                <text class="value">{{ p.deviceId || "未知" }}</text>
+                                <text class="label">售后到期时间</text>
+                                <text class="value">{{ p.warrantyExpiration || "未知" }}</text>
                             </view>
                         </view>
                         <view class="actions">
-                            <!-- <button
-                v-if="p.sn === connectedDeviceName"
-                class="unbind"
-                @tap="unbind(i)"
-              >
-                去激活
-              </button> -->
-                            <button class="unbind" @tap="unbind(i)">去激活</button>
+                            <button 
+                                v-if="(p.deviceId === connectedDeviceId || p.bluetoothName === connectedDeviceName)"
+                                class="unbind" 
+                                @tap="unbind(i)"
+                            >
+                                去激活
+                            </button>
                         </view>
                     </view>
                     <view v-if="!products.length" class="empty">暂无绑定产品</view>
@@ -80,6 +79,7 @@ export default {
             backTop: 0,
             titleTop: 0,
             connectedDeviceName: "",
+            connectedDeviceId: "",
             products: [],
             loading: true,
             error: "",
@@ -96,92 +96,182 @@ export default {
             }
         },
         // 获取产品数据
-        async getProducts() {
-            try {
-                this.loading = true;
-                this.error = "";
+        getProducts() {
+            this.loading = true;
+            this.error = "";
 
-                // 使用假数据
-                this.products = [
-                    {
-                        id: 1,
-                        sn: "SN123456",
-                        code: "ACT789012",
-                        time: "2026-03-12 10:00:00",
-                        bluetoothName: "APP-13124",
-                        deviceId: "device123"
-                    }
-                ];
-            } catch (err) {
-                console.error("获取产品数据失败", err);
-                this.error = "网络连接异常";
+            // 获取微信ID
+            const wechatId = uni.getStorageSync("wechatId") || "";
+            
+            if (!wechatId) {
+                this.error = "未获取到微信ID";
                 this.products = [];
-            } finally {
                 this.loading = false;
+                return;
             }
+
+            console.log("开始请求产品数据，wechatId:", wechatId);
+
+            // 调用API获取绑定产品
+            uni.request({
+                url: `https://www.bistec.cn/api/bound-products?wechatId=${wechatId}`,
+                method: "GET",
+                header: {
+                    "content-type": "application/json"
+                },
+                success: (response) => {
+                    console.log("API响应类型:", typeof response);
+                    console.log("API响应:", response);
+                    console.log("响应状态码:", response.statusCode);
+
+                    // 检查响应对象是否有效
+                    if (!response) {
+                        console.error("响应对象为空");
+                        this.error = "网络连接异常";
+                        this.products = [];
+                        return;
+                    }
+
+                    // 检查statusCode是否存在且为200
+                    if (response.statusCode === 200) {
+                        const result = response.data;
+                        console.log("响应数据:", result);
+                        
+                        // 检查result是否直接是数组
+                        if (Array.isArray(result)) {
+                            console.log("响应数据直接是数组");
+                            // 映射API返回的字段到组件需要的字段
+                            this.products = result.map(item => ({
+                                id: item.productId,
+                                sn: item.serialNumber,
+                                code: item.activationCode,
+                                time: item.activationTime,
+                                bluetoothName: item.bluetoothName,
+                                deviceId: item.deviceId,
+                                warrantyDays: item.warrantyDays,
+                                warrantyExpiration: item.warrantyExpiration
+                            }));
+                            console.log("处理后的产品数据:", this.products);
+                        } 
+                        // 检查result.data是否是数组
+                        else if (result && Array.isArray(result.data)) {
+                            console.log("响应数据的data属性是数组");
+                            // 映射API返回的字段到组件需要的字段
+                            this.products = result.data.map(item => ({
+                                id: item.productId,
+                                sn: item.serialNumber,
+                                code: item.activationCode,
+                                time: item.activationTime,
+                                bluetoothName: item.bluetoothName,
+                                deviceId: item.deviceId,
+                                warrantyDays: item.warrantyDays,
+                                warrantyExpiration: item.warrantyExpiration
+                            }));
+                            console.log("处理后的产品数据:", this.products);
+                        } 
+                        // 检查result.data.data是否是数组（根据网络预览，可能是嵌套的data结构）
+                        else if (result && result.data && Array.isArray(result.data.data)) {
+                            console.log("响应数据的data.data属性是数组");
+                            // 映射API返回的字段到组件需要的字段
+                            this.products = result.data.data.map(item => ({
+                                id: item.productId,
+                                sn: item.serialNumber,
+                                code: item.activationCode,
+                                time: item.activationTime,
+                                bluetoothName: item.bluetoothName,
+                                deviceId: item.deviceId,
+                                warrantyDays: item.warrantyDays,
+                                warrantyExpiration: item.warrantyExpiration
+                            }));
+                            console.log("处理后的产品数据:", this.products);
+                        } else {
+                            console.log("响应数据格式不正确，设置产品列表为空");
+                            this.products = [];
+                        }
+                    } else {
+                        console.error("获取产品数据失败，状态码:", response.statusCode);
+                        this.error = "网络连接异常";
+                        this.products = [];
+                    }
+                },
+                fail: (err) => {
+                    console.error("获取产品数据失败，错误:", err);
+                    this.error = "网络连接异常";
+                    this.products = [];
+                },
+                complete: () => {
+                    this.loading = false;
+                    console.log("请求完成，loading设置为false");
+                }
+            });
         },
-        async unbind(index) {
+        unbind(index) {
             const item = this.products[index];
             uni.showModal({
                 title: "确认去激活",
                 content: `确定去激活序列号为 ${item.sn} 的产品吗？`,
-                success: async (res) => {
+                success: (res) => {
                     if (res.confirm) {
-                        try {
-                            //   // 断开蓝牙连接
-                            //   await bluetoothManager.disconnect();
-                            //   // 重置蓝牙状态
-                            //   bluetoothManager.reset();
-                            //   // 从列表中移除
-                            //   this.products.splice(index, 1);
-                            //   uni.showToast({
-                            //     title: "已去激活",
-                            //     icon: "none",
-                            //   });
-                            //   // 返回激活画面
-                            //   setTimeout(() => {
-                            //     uni.navigateTo({
-                            //       url: "/pages/ble/index",
-                            //     });
-                            //   }, 1000);
-                            // 调用sendData方法，初始化所有参数为0，modeIndex为1
-                            const mockThat = {
-                                drawProgress: 0,
-                                gaugeList: [{ progress: 0 }, { progress: 0 }, { progress: 0 }],
-                                sceneListIndex: 0,
-                                activateFlag: 0, // 激活标志位设为0（去激活）
-                            };
-                            // 等待sendData完成后再断开蓝牙连接
-                            try {
-                                await sendData(1, mockThat);
-                                console.log("发送去激活数据成功");
-                            } catch (error) {
-                                console.error("发送去激活数据失败", error);
-                            }
-                            uni.showToast({
-                                title: "已去激活",
-                                icon: "none",
-                            });
-                            // 返回激活画面
-                            setTimeout(async () => {
-                                // 断开蓝牙连接
-                                await bluetoothManager.disconnect();
-                                // 重置蓝牙状态
-                                bluetoothManager.reset();
-                                // 从列表中移除
-                                this.products.splice(index, 1);
-                                uni.navigateTo({
-                                    url: "/pages/ble/index",
+                        // 调用去激活API
+                        uni.request({
+                            url: "https://www.bistec.cn/api/deactivate",
+                            method: "POST",
+                            header: {
+                                "content-type": "application/json"
+                            },
+                            data: {
+                                productId: item.id
+                            },
+                            success: (response) => {
+                                if (response.statusCode === 200) {
+                                    // 调用sendData方法，初始化所有参数为0，modeIndex为1
+                                    const mockThat = {
+                                        drawProgress: 0,
+                                        gaugeList: [{ progress: 0 }, { progress: 0 }, { progress: 0 }],
+                                        sceneListIndex: 0,
+                                        activateFlag: 0, // 激活标志位设为0（去激活）
+                                    };
+                                    // 等待sendData完成后再断开蓝牙连接
+                                    try {
+                                        sendData(1, mockThat);
+                                        console.log("发送去激活数据成功");
+                                    } catch (error) {
+                                        console.error("发送去激活数据失败", error);
+                                    }
+                                    uni.showToast({
+                                        title: "已去激活",
+                                        icon: "none",
+                                    });
+                                    // 返回激活画面
+                                    setTimeout(() => {
+                                        // 断开蓝牙连接
+                                        bluetoothManager.disconnect();
+                                        // 重置蓝牙状态
+                                        bluetoothManager.reset();
+                                        // 从列表中移除
+                                        this.products.splice(index, 1);
+                                        uni.navigateTo({
+                                            url: "/pages/ble/index",
+                                        });
+                                    }, 1000);
+                                } else {
+                                    console.error("去激活API调用失败", response);
+                                    uni.showToast({
+                                        title: "去激活失败",
+                                        icon: "error",
+                                        duration: 2000,
+                                    });
+                                }
+                            },
+                            fail: (err) => {
+                                console.error("去激活失败", err);
+                                uni.showToast({
+                                    title: "去激活失败",
+                                    icon: "error",
+                                    duration: 2000,
                                 });
-                            }, 1000);
-                        } catch (err) {
-                            console.error("去激活失败", err);
-                            uni.showToast({
-                                title: "去激活失败",
-                                icon: "error",
-                                duration: 2000,
-                            });
-                        }
+                            }
+                        });
                     }
                 },
             });
@@ -201,8 +291,9 @@ export default {
                 this.totalHeight = this.statusBarHeight + this.navigatorHeight;
                 this.backTop = this.statusBarHeight + this.navigatorHeight / 2 - 13;
                 this.titleTop = this.statusBarHeight + (this.navigatorHeight - 24) / 2;
-                // 获取当前连接的蓝牙设备名称
+                // 获取当前连接的蓝牙设备信息
                 this.connectedDeviceName = bluetoothManager.getConnectedDeviceName();
+                this.connectedDeviceId = bluetoothManager.deviceId;
 
                 // 获取产品数据
                 this.getProducts();
