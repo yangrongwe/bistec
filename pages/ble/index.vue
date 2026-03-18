@@ -433,10 +433,10 @@ export default {
           });
         } else if (activationStatus === 0) {
           // 激活状态为0，显示未激活提示
-          this.message = {
-            type: "error",
-            text: "当前设备未激活请输入激活码激活",
-          };
+        //   this.message = {
+        //     type: "error",
+        //     text: "当前设备未激活请输入激活码激活",
+        //   };
         }
       });
     },
@@ -558,10 +558,11 @@ export default {
               console.error("发送激活数据失败", error);
             }
           } else {
+            console.log("激活失败响应", response);
             // 激活失败
             this.message = {
               type: "error",
-              text: response?.message || "激活失败",
+              text: response?.data?.message || "激活失败",
             };
           }
         } catch (err) {
