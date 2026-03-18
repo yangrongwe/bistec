@@ -428,7 +428,7 @@ export default {
           //       url: "/pages/index/index",
           //     });
           //   }, 1000);
-          uni.navigateTo({
+          uni.reLaunch({
             url: "/pages/index/index",
           });
         } else if (activationStatus === 0) {
@@ -527,10 +527,6 @@ export default {
                 resolve(res);
               },
               fail: (err) => {
-                this.message = {
-                  type: "error",
-                  text: "位置获取失败",
-                };
                 reject(err);
               },
             });
@@ -565,7 +561,7 @@ export default {
             // 激活失败
             this.message = {
               type: "error",
-              text: response.data?.message || "激活失败，请检查激活码是否正确",
+              text: response?.message || "激活失败",
             };
           }
         } catch (err) {

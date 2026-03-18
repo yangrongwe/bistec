@@ -221,53 +221,26 @@ export default {
       this.connect(data);
     },
     async initBlueModal() {
-      this.$set(this, "blueList", []);
-      // 设置标志为阻止扫描
-      this.blueListFlag = true;
-
       try {
-        const devices = await new Promise((resolve) => {
-          uni.getConnectedBluetoothDevices({
-            success: function (res) {
-              console.log("存在蓝牙设备集合 res.devices", res.devices);
-              resolve(res.devices);
-            },
-            fail: function (err) {
-              console.error("获取连接设备失败：", err);
-              resolve([]);
-            },
-          });
+        // 断开蓝牙连接
+        await this.bluetoothManager.disconnect();
+        console.log("蓝牙连接已断开");
+        
+        // 清除存储的设备信息
+        uni.removeStorageSync("deviceId");
+        uni.removeStorageSync("scanName");
+        
+        // 跳转到激活页面
+        uni.reLaunch({
+          url: "/pages/ble/index"
         });
-
-        if (devices.length > 0) {
-          for (const device of devices) {
-            console.log("设备ID:", device.deviceId);
-            console.log("设备名称:", device.name);
-            try {
-              await this.bluetoothManager.disconnect();
-              console.log("蓝牙连接已断开1");
-            } catch (err) {
-              console.error("断开蓝牙连接失败", err);
-            }
-          }
-        } else {
-          try {
-            await this.bluetoothManager.disconnect();
-            console.log("蓝牙连接已断开1---");
-          } catch (err) {
-            console.error("断开蓝牙连接失败-----", err);
-          }
-          console.log("当前没有连接的蓝牙设备");
-        }
-
-        await this.initBlue();
       } catch (err) {
-        console.error("初始化蓝牙模态框失败", err);
-        await this.initBlue();
+        console.error("断开蓝牙连接失败", err);
+        // 即使断开失败也跳转到激活页面
+        uni.reLaunch({
+          url: "/pages/ble/index"
+        });
       }
-
-      // 打开弹出框
-      this.blueModalShow = true;
     },
     scan() {
       // 如果已经连接过蓝牙，断开蓝牙连接

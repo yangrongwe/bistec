@@ -250,7 +250,7 @@ export default {
                                         bluetoothManager.reset();
                                         // 从列表中移除
                                         this.products.splice(index, 1);
-                                        uni.navigateTo({
+                                        uni.reLaunch({
                                             url: "/pages/ble/index",
                                         });
                                     }, 1000);
