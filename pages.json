@@ -4,7 +4,10 @@
       "path": "pages/ble/index",
       "style": {
         "navigationStyle": "custom",
-        "disableSwipeBack": true
+        "disableSwipeBack": true,
+        "mp-weixin": {
+          "requiredPrivateInfos": ["getLocation"]
+        }
       }
     },
     {

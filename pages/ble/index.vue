@@ -502,10 +502,11 @@ export default {
               },
               fail: (err) => {
                 console.error("获取地理位置失败", err);
+                reject(err);
               },
             });
           });
-
+          console.log("获取地理位置成功", location);
           // 调用激活API
           const response = await new Promise((resolve, reject) => {
             uni.request({
@@ -526,6 +527,10 @@ export default {
                 resolve(res);
               },
               fail: (err) => {
+                this.message = {
+                  type: "error",
+                  text: "位置获取失败",
+                };
                 reject(err);
               },
             });
