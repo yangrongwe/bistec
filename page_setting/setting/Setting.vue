@@ -352,7 +352,6 @@ import {sendData} from "../../util/sendInfo.js"
 			this.characteristicId = uni.getStorageSync("writeCharacteristicId");
 			if(uni.getStorageSync("setting")){
 				const setting = JSON.parse(uni.getStorageSync("setting"));
-				console.log("setting",setting);
                 // 处理数值范围，确保在1-9之间
 				const clamp = (value) => {
 					if (value === 10) return 9;

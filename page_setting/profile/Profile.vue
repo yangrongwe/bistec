@@ -226,8 +226,8 @@ export default {
                                 if (response.statusCode === 200) {
                                     // 调用sendData方法，初始化所有参数为0，modeIndex为1
                                     const mockThat = {
-                                        drawProgress: 0,
-                                        gaugeList: [{ progress: 0 }, { progress: 0 }, { progress: 0 }],
+                                        drawProgress: 1,
+                                        gaugeList: [{ progress: 1 }, { progress: 1 }, { progress: 1 }],
                                         sceneListIndex: 0,
                                         activateFlag: 0, // 激活标志位设为0（去激活）
                                     };

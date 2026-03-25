@@ -543,8 +543,8 @@ export default {
 
             // 调用sendData方法，初始化所有参数为0，modeIndex为1
             const mockThat = {
-              drawProgress: 0,
-              gaugeList: [{ progress: 0 }, { progress: 0 }, { progress: 0 }],
+              drawProgress: 1,
+              gaugeList: [{ progress: 1 }, { progress: 1 }, { progress: 1 }],
               sceneListIndex: 0,
               activateFlag: 1, // 激活标志位设为1（激活）
             };
