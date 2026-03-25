@@ -50,7 +50,7 @@
                                 class="unbind" 
                                 @tap="unbind(i)"
                             >
-                                去激活
+                                取消激活
                             </button>
                         </view>
                     </view>

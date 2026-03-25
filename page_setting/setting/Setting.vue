@@ -352,10 +352,16 @@ import {sendData} from "../../util/sendInfo.js"
 			this.characteristicId = uni.getStorageSync("writeCharacteristicId");
 			if(uni.getStorageSync("setting")){
 				const setting = JSON.parse(uni.getStorageSync("setting"));
-				this.gaugeList[0].progress = setting.frontSuspension;
-				this.gaugeList[1].progress = setting.heel;
-				this.gaugeList[2].progress = setting.behindSuspension;
-				this.drawProgress = setting.DC;
+				console.log("setting",setting);
+                // 处理数值范围，确保在1-9之间
+				const clamp = (value) => {
+					if (value === 10) return 9;
+					return Math.max(1, Math.min(9, value || 5));
+				};
+				this.gaugeList[0].progress = clamp(setting.frontSuspension);
+				this.gaugeList[1].progress = clamp(setting.rollStrength);
+				this.gaugeList[2].progress = clamp(setting.rearSuspension);
+				this.drawProgress = clamp(setting.drawStrength);
 				// this.sceneList.forEach(value => {
 				// 	if(value.name==setting.fastChange){
 				// 		value.status=true;
