@@ -358,9 +358,13 @@ import {sendData} from "../../util/sendInfo.js"
 					if (value === 10) return 9;
 					return Math.max(1, Math.min(9, value || 5));
 				};
+				// 前悬架压缩 → 前悬架强度
 				this.gaugeList[0].progress = clamp(setting.frontSuspension);
+				// 前悬架复原 → 侧倾强度
 				this.gaugeList[1].progress = clamp(setting.rollStrength);
+				// 后悬架压缩 → 后悬架强度
 				this.gaugeList[2].progress = clamp(setting.rearSuspension);
+				// 后悬架复原 → 拉压强度
 				this.drawProgress = clamp(setting.drawStrength);
 				// this.sceneList.forEach(value => {
 				// 	if(value.name==setting.fastChange){
@@ -380,54 +384,7 @@ import {sendData} from "../../util/sendInfo.js"
 		}
 		}
 	}
-	function HexStringToBuffer(hexString) {
-	        let rawStr = hexString.trim().toUpperCase();
-	        let len = rawStr.length;
-	        let curCharCode = 0;
-	        let utf8Arr = [];
-	        let i = 0;
-	        while (i < len) {
-	            let h = 0;
-	            while ((i < len) && ((h < 48 || h > 57) && (h < 65 || h > 70))) {
-	                h = rawStr.charCodeAt(i);
-	                i++;
-	            }
-	
-	            if (i >= len) {
-	                break;
-	            }
-	
-	            let l = 0;
-	            while ((i < len) && ((l < 48 || l > 57) && (l < 65 || l > 70))) {
-	                l = rawStr.charCodeAt(i);
-	                i++;
-	            }
-	
-	            if (l >= 48 && l <= 57) {
-	                l = l - 48;
-	            }
-	            else if (l >= 65 && l <= 70) {
-	                l = l - 65 + 10;
-	            }
-	            else {
-	                break;
-	            }
-	
-	            if (h >= 48 && h <= 57) {
-	                h = h - 48;
-	            }
-	            else if (h >= 65 && h <= 70) {
-	                h = h - 65 + 10;
-	            }
-	            else {
-	                break;
-	            }
-	
-	            curCharCode = l + (h << 4);
-	            utf8Arr.push(curCharCode);
-	        }
-	        return new Uint8Array(utf8Arr).buffer;
-	    }
+
 	</script>
 
 <style lang="less" scoped>

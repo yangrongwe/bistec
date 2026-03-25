@@ -393,9 +393,9 @@ class BluetoothManager {
     const { output1, output2, output3 } = data;
 
     // 输出1解析 - 基础工况与模式控制
-    const activationFlag = (output1 >> 5) & 0x07; // 激活标志位 (位8-6)
-    const workConditionInt = (output1 >> 2) & 0x07; // 工况标识 (位5-3)
-    const mode = output1 & 0x03; // 当前模式反馈 (位2-1)
+    const activationFlag = (output1 >> 5) & 0x07; // 激活标志位 (位7-5, 0-31编号)
+    const workConditionInt = (output1 >> 2) & 0x07; // 工况标识 (位4-2, 0-31编号)
+    const mode = output1 & 0x03; // 当前模式反馈 (位1-0, 0-31编号)
 
     // 工况
     let workCondition = "";
@@ -420,26 +420,26 @@ class BluetoothManager {
     }
 
     // 输出2解析 - 悬架强度与 G 值参数
-    const drawStrength = (output2 >> 29) & 0x0f; // 拉压强度 (位32-29)
-    const rearSuspension = (output2 >> 25) & 0x0f; // 后悬架强度 (位28-25)
-    const rollStrength = (output2 >> 21) & 0x0f; // 侧倾强度 (位24-21)
-    const frontSuspension = (output2 >> 17) & 0x0f; // 前悬架强度 (位20-17)
-    const gxRaw = (output2 >> 9) & 0xff; // X轴加速度原始值 (位16-9, 0-200)
-    const gyRaw = output2 & 0xff; // Y轴加速度原始值 (位8-1, 0-200)
+    const drawStrength = (output2 >> 28) & 0x0f; // 拉压强度 (位31-28, 0-31编号)
+    const rearSuspension = (output2 >> 24) & 0x0f; // 后悬架强度 (位27-24, 0-31编号)
+    const rollStrength = (output2 >> 20) & 0x0f; // 侧倾强度 (位23-20, 0-31编号)
+    const frontSuspension = (output2 >> 16) & 0x0f; // 前悬架强度 (位19-16, 0-31编号)
+    const gxRaw = (output2 >> 8) & 0xff; // X轴加速度原始值 (位15-8, 0-31编号, 0-200)
+    const gyRaw = output2 & 0xff; // Y轴加速度原始值 (位7-0, 0-31编号, 0-200)
     const G = {
       GX: (gxRaw - 100) / 100, // 实际G值 (当前G值/g×100+100)
       GY: (gyRaw - 100) / 100, // 实际G值 (当前G值/g×100+100)
     };
 
     // 输出3解析 - 四悬架阻尼参数
-    const FLCompress = (output3 >> 29) & 0x0f; // FL压缩阻尼 (位32-29, 0-8)
-    const FLDraw = (output3 >> 25) & 0x0f; // FL拉伸阻尼 (位28-25, 0-8)
-    const FRCompress = (output3 >> 21) & 0x0f; // FR压缩阻尼 (位24-21, 0-8)
-    const FRDraw = (output3 >> 17) & 0x0f; // FR拉伸阻尼 (位20-17, 0-8)
-    const RLCompress = (output3 >> 13) & 0x0f; // RL压缩阻尼 (位16-13, 0-8)
-    const RLDraw = (output3 >> 9) & 0x0f; // RL拉伸阻尼 (位12-9, 0-8)
-    const RRCompress = (output3 >> 5) & 0x0f; // RR压缩阻尼 (位8-5, 0-8)
-    const RRDraw = (output3 >> 1) & 0x0f; // RR拉伸阻尼 (位4-1, 0-8)
+    const FLCompress = (output3 >> 28) & 0x0f; // FL压缩阻尼 (位31-28, 0-31编号, 0-8)
+    const FLDraw = (output3 >> 24) & 0x0f; // FL拉伸阻尼 (位27-24, 0-31编号, 0-8)
+    const FRCompress = (output3 >> 20) & 0x0f; // FR压缩阻尼 (位23-20, 0-31编号, 0-8)
+    const FRDraw = (output3 >> 16) & 0x0f; // FR拉伸阻尼 (位19-16, 0-31编号, 0-8)
+    const RLCompress = (output3 >> 12) & 0x0f; // RL压缩阻尼 (位15-12, 0-31编号, 0-8)
+    const RLDraw = (output3 >> 8) & 0x0f; // RL拉伸阻尼 (位11-8, 0-31编号, 0-8)
+    const RRCompress = (output3 >> 4) & 0x0f; // RR压缩阻尼 (位7-4, 0-31编号, 0-8)
+    const RRDraw = output3 & 0x0f; // RR拉伸阻尼 (位3-0, 0-31编号, 0-8)
 
     // 阻尼设定
     const DC = {
@@ -470,7 +470,7 @@ class BluetoothManager {
   // 解析激活状态
   parseActivationStatus(data) {
     const { output1 } = data;
-    // 激活标志位：位8~6（对应output1的bit6-8）
+    // 激活标志位：位7~5（对应output1的bit5-7, 0-31编号）
     let activationStatus = (output1 >> 5) & 0x07;
     // console.log("激活状态:", activationStatus);
     return activationStatus;
