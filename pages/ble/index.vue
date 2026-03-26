@@ -236,7 +236,7 @@ export default {
             // 这里需要根据实际的后端接口来获取 openid
             // 示例：调用后端接口获取 openid
             uni.request({
-              url: "https://www.bistec.cn/api/wechat/login",
+              url: "https://www.bistec.cn/api_admin/wechat/login",
               method: "POST",
               data: {
                 code: res.code,
@@ -433,10 +433,10 @@ export default {
           });
         } else if (activationStatus === 0) {
           // 激活状态为0，显示未激活提示
-        //   this.message = {
-        //     type: "error",
-        //     text: "当前设备未激活请输入激活码激活",
-        //   };
+          //   this.message = {
+          //     type: "error",
+          //     text: "当前设备未激活请输入激活码激活",
+          //   };
         }
       });
     },
@@ -510,7 +510,7 @@ export default {
           // 调用激活API
           const response = await new Promise((resolve, reject) => {
             uni.request({
-              url: "https://www.bistec.cn/api/activate",
+              url: "https://www.bistec.cn/api_admin/activate",
               method: "POST",
               header: {
                 "Content-Type": "application/json",
