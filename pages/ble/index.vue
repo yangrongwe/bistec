@@ -236,7 +236,7 @@ export default {
             // 这里需要根据实际的后端接口来获取 openid
             // 示例：调用后端接口获取 openid
             uni.request({
-              url: "https://www.bistec.cn/api_admin/wechat/login",
+              url: "https://www.bistec.cn/admin_api/wechat/login",
               method: "POST",
               data: {
                 code: res.code,
@@ -510,7 +510,7 @@ export default {
           // 调用激活API
           const response = await new Promise((resolve, reject) => {
             uni.request({
-              url: "https://www.bistec.cn/api_admin/activate",
+              url: "https://www.bistec.cn/admin_api/activate",
               method: "POST",
               header: {
                 "Content-Type": "application/json",

@@ -9,13 +9,13 @@
     ></image>
     <view class="header bis-flex" :style="{ height: totalHeight + 'px' }">
       <view>ADC电控主动减振</view>
-      <uni-icons
+      <!-- <uni-icons
         type="scan"
         size="20"
         color="white"
         style="margin-top: 8rpx; margin-left: 10rpx"
         @click="resetScan"
-      ></uni-icons>
+      ></uni-icons> -->
     </view>
     <view class="main">
       <blue-modal

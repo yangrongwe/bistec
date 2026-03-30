@@ -123,7 +123,7 @@ export default {
 
       // 调用API获取绑定产品
       uni.request({
-        url: `https://www.bistec.cn/api_admin/bound-products?wechatId=${wechatId}`,
+        url: `https://www.bistec.cn/admin_api/bound-products?wechatId=${wechatId}`,
         method: "GET",
         header: {
           "content-type": "application/json",
@@ -223,7 +223,7 @@ export default {
           if (res.confirm) {
             // 调用去激活API
             uni.request({
-              url: "https://www.bistec.cn/api_admin/deactivate",
+              url: "https://www.bistec.cn/admin_api/deactivate",
               method: "POST",
               header: {
                 "content-type": "application/json",
